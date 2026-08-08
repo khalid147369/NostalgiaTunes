@@ -1,10 +1,6 @@
-
 import axios from "axios";
 import { getAccessToken, setAccessToken } from "./authToken";
-import { useUser } from "@/hooks/useUser";
-
-
-
+import { useUser } from "@/hooks/auth/useUser";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -12,18 +8,28 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
   // CRÍTICO: Obliga a Axios a enviar y recibir cookies httpOnly
-  withCredentials: true, 
+  withCredentials: true,
+});
+
+
+api.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  } else {
+    config.headers["Content-Type"] = "application/json";
+  }
+
+  return config;
 });
 
 api.interceptors.request.use((config) => {
+  const token = getAccessToken();
 
-    const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
+  return config;
 });
 
 // Control para evitar peticiones múltiples de refresco en paralelo
@@ -50,14 +56,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     //Para que refresh no refresca a sí mismo
-    if (
-    originalRequest.url === "/auth/refresh"
-    ) {
-        return Promise.reject(error);
+    if (originalRequest.url === "/auth/refresh") {
+      return Promise.reject(error);
     }
     // Si recibimos un 401 y la petición no ha sido reintentada aún
     if (error.response?.status === 401 && !originalRequest._retry) {
-      
       // Si ya hay un refresco en proceso, ponemos esta petición en espera
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -72,23 +75,20 @@ api.interceptors.response.use(
 
       try {
         // Llamamos a nuestro Route Handler de Next.js (utilizando la URL relativa del frontend)
-        const {data} = await api.post("/auth/refresh");
+        const { data } = await api.post("/auth/refresh");
 
-        
-        setAccessToken(data?.token)
+        setAccessToken(data?.token);
 
         // Si el refresco fue exitoso, notificamos a las peticiones en cola
         processQueue(null);
 
         // Reintentamos la petición original con la nueva cookie ya actualizada
-        originalRequest.headers.Authorization =
-        `Bearer ${data.token}`;
+        originalRequest.headers.Authorization = `Bearer ${data.token}`;
         return api(originalRequest);
       } catch (refreshError) {
         // Si el refresh token también expiró en el servidor
         processQueue(refreshError);
-        
-       
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -96,5 +96,5 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );

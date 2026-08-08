@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AuthDTO } from '@/types'
-import { useRegister } from '@/hooks/useRegister'
+import { useRegister } from '@/hooks/auth/useRegister'
 
 type Errors = {
   username?: string

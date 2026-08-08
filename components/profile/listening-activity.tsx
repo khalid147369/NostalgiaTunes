@@ -3,8 +3,8 @@
 import type { ComponentType } from "react"
 import { motion } from "framer-motion"
 import { Bookmark, Heart, MessageCircle, Play } from "lucide-react"
-import { activity } from "@/lib/mock-data"
 import { SectionHeading } from "./section-heading"
+import { Comment, Song } from "@/types"
 
 const icons: Record<string, ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>> = {
   play: Play,
@@ -13,7 +13,46 @@ const icons: Record<string, ComponentType<{ className?: string; "aria-hidden"?: 
   comment: MessageCircle,
 }
 
-export function ListeningActivity() {
+interface ListeningActivityInterface {
+  lastPlayedSong : Song
+  lastLikedSong : Song
+  lastSavedSong : Song
+  lastComment : Comment
+}
+
+export function ListeningActivity({lastPlayedSong,lastLikedSong,lastSavedSong,lastComment}:ListeningActivityInterface) {
+
+
+  const activity = [
+  {
+    id: "a1",
+    when: "Yesterday",
+    action: "Played",
+    subject: lastPlayedSong?.cartoon,
+    type: "play" as const,
+  },
+  {
+    id: "a2",
+    when: "2 days ago",
+    action: "Liked",
+    subject: lastLikedSong?.cartoon,
+    type: "like" as const,
+  },
+  {
+    id: "a3",
+    when: "Last week",
+    action: "Saved",
+    subject: lastSavedSong?.cartoon,
+    type: "save" as const,
+  },
+  {
+    id: "a4",
+    when: "Last week",
+    action: "Commented on",
+    subject: lastComment?.songName,
+    type: "comment" as const,
+  },
+]
   return (
     <section aria-labelledby="activity-heading">
       <SectionHeading

@@ -1,4 +1,4 @@
-import { SongFilters } from "@/types";
+import { Song, SongFilters } from "@/types";
 import { api } from "./api";
 
 export const SongService = {
@@ -11,8 +11,8 @@ export const SongService = {
     return api.get(`/songs/trending${category? `?category=${category}`:""}`);
   },
 
-  getRecentlyAdded() {
-    return api.get("/songs/getAll?isNew=true");
+  getRecentlyAdded(size=10) {
+    return api.get(`/songs/getAll?isNew=true&size=${size}`);
   },
 
     getRecentlyPlayed() {
@@ -20,7 +20,7 @@ export const SongService = {
   },
 
   getMostListened() {
-    return api.get("/songs/getAll?sort=listens,desc&size=7");
+    return api.get("/songs/getAll?sort=numEscuchas,desc&size=7");
   },
 
   filterSongs(column:SongFilters=SongFilters.title,direction:string='desc',size:number=10) {
@@ -30,8 +30,8 @@ export const SongService = {
     return api.get(`/songs/getSingle/${id}`);
   },
 
-  create(song:any){
-    return api.post("/songs",song);
+  create(song: FormData){
+    return api.post<Song>("/songs",song);
   },
 
   update(id:number,song:any){

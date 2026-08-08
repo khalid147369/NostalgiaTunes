@@ -24,6 +24,7 @@ interface SongCarouselProps {
 export function SongCarousel({ eyebrow, title, songs }: SongCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null)
 
+  console.log("songss",songs);
   const scrollBy = (dir: 1 | -1) => {
     scrollerRef.current?.scrollBy({ left: dir * 320, behavior: 'smooth' })
   }

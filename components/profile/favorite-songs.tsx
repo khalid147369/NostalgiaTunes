@@ -8,15 +8,15 @@ import { cn } from "@/lib/utils"
 import { usePlayer } from "@/contexts/player-context"
 import { useSavedSongs } from "@/hooks/savedSongs/useSavedSong"
 import { Song } from "@/types"
+import { useUnsave } from "@/hooks/savedSongs/useUnsave"
 
-export function FavoriteSongs() {
+export function FavoriteSongs({favoriteSongs}:{favoriteSongs:Song[]}) {
   const [liked, setLiked] = useState<Record<string, boolean>>({ fs1: true, fs3: true })
   const [saved, setSaved] = useState<Record<string, boolean>>({ fs1: true })
 
   const { toggleSavedSong, likedIds,toggleLike,SavedSongIds } = usePlayer();
-
-  const { data } = useSavedSongs();
-
+const {mutate:unsave} = useUnsave();
+console.log(SavedSongIds);
   useEffect(() => {
     setLiked((prev) => {
       const nextLiked = { ...prev };
@@ -36,8 +36,8 @@ export function FavoriteSongs() {
       return nextSaved;
     });
   }, [SavedSongIds]);
-console.log(liked);
-  const favoriteSongs: Song[] = data?.data ?? [];
+
+ 
 
 
 const visibleSongs = favoriteSongs.filter(
@@ -103,12 +103,12 @@ const visibleSongs = favoriteSongs.filter(
                       type="button"
                       aria-label={saved[song.id] ? `Unsave ${song.title}` : `Save ${song.title}`}
                       aria-pressed={saved[song.id] ?? false}
-                      onClick={() =>{toggleSavedSong(song.id),setSaved((s) => ({ ...s, [song.id]: !s[song.id] }))} }
+                      onClick={() =>{toggleSavedSong(song.id),setSaved((s) => ({ ...s, [song.id]: !s[song.id] })),unsave(Number(song.id))} }
                       className={cn(
                         "flex size-8 items-center justify-center rounded-full transition-colors"
                       )}
                     >
-                      <Bookmark className={cn("size-4", liked[song.id] && "fill-current")} aria-hidden="true" />
+                      <Bookmark className={cn("size-4", "fill-current")} aria-hidden="true" />
                     </button>
                     <button
                       type="button"

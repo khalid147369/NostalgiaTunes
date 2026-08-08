@@ -22,8 +22,9 @@ interface SongId {
 const SingleSong = ({ songId }: SongId) => {
   const [song, setSong] = useState<Song>();
   const [relatedSongs, setRelatedSongs] = useState<Song[]>([]);
+  const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
   const { mutateAsync, isPending } = useSinglSong();
-  const { data } = useTrending();
+  const { mutateAsync: trending } = useTrending();
   const { mutateAsync: relatedSongsMute } = useFilterSong();
 
   const getSong = async () => {
@@ -40,15 +41,22 @@ const SingleSong = ({ songId }: SongId) => {
 
     return data;
   };
+ 
 
+  const getTrendingSongs = async () => {
+    const { data } = await trending(undefined);
 
+    console.log(data.content);
+    setTrendingSongs(data.content);
+  };
 
-  console.log(data?.data.content);
-  const alsoLikeSongs = data?.data.content ;
   useEffect(() => {
     getSong();
     getRelatedSongs();
+    getTrendingSongs();
   }, []);
+
+  const alsoLikeSongs = trendingSongs;
   return (
     <>
       {song && (
@@ -59,7 +67,7 @@ const SingleSong = ({ songId }: SongId) => {
 
             <SongStats song={song} />
             <AboutSong song={song} />
-            <CommentsSection />
+            <CommentsSection song={song} />
 
             <SongCarousel
               eyebrow="From the same universe"

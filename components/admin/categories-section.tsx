@@ -8,37 +8,11 @@ import { Button } from "@/components/ui/button";
 import { SectionHeader } from "./section-header";
 import { useCategories } from "@/hooks/category/useCategory";
 import { CategoryDTO } from "@/types";
+import { timeAgo } from "@/lib/utils";
 
 export function CategoriesSection() {
   const { data } = useCategories();
   const categories: CategoryDTO[] = data?.data || [];
-
-  const daysAgo = (category: CategoryDTO): string => {
-    console.log(category.updatedAt);
-    console.log(new Date(category.updatedAt));
-    console.log(Date.now() - new Date(category.updatedAt).getTime());
-    const diff = Date.now() - new Date(category.updatedAt).getTime();
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days >= 1) {
-      return `${days}d  ago`;
-    }
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-
-    if (hours >= 1) {
-      return `${hours}h  ago`;
-    }
-
-    const minutes = Math.floor(diff / (1000 * 60));
-
-    if (minutes >= 1) {
-      return `${minutes}m  ago`;
-    }
-
-    return "Just now";
-  };
 
   return (
     <div className="space-y-6">
@@ -55,7 +29,8 @@ export function CategoriesSection() {
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {categories.map((category, i) => (
+        {categories?.map((category, i) => (
+          
           <motion.article
             key={category.id}
             initial={{ opacity: 0, y: 16 }}
@@ -88,7 +63,7 @@ export function CategoriesSection() {
               <div className="mt-4 flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Music className="size-3.5" />
-                  Updated {daysAgo(category)}
+                  Updated {timeAgo(category.updatedAt)}
                 </span>
                 <div className="flex gap-1">
                   <Button

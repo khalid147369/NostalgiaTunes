@@ -8,23 +8,28 @@ import { usesearch } from "@/hooks/useSearch";
 import SearchResults from "../ui/songSearchPanel";
 import { useRouter } from "next/navigation";
 import { useCategories } from "@/hooks/category/useCategory";
+import { Song } from "@/types";
 
-const suggestions = ["Dragon Ball", "Pokémon", "Digimon", "Detective Conan"];
+
 
 interface SearchBarProps {
   className?: string;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
   placeholder:string;
+  trending:Song[];
 }
 
-export function SearchBar({ className, handleChange, value ,placeholder}: SearchBarProps) {
+export function SearchBar({ className, handleChange, value ,placeholder,trending}: SearchBarProps) {
   const [focused, setFocused] = useState(false);
 
   const { focus } = useSearchFocus();
 
   const handleSearch = async () => {};
 
+  const suggestions :string[]=trending?.map(s=>s.cartoon);
+
+ 
   useEffect(() => {
     setFocused(focus);
   }, [focus]);
@@ -71,7 +76,7 @@ export function SearchBar({ className, handleChange, value ,placeholder}: Search
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-xs text-muted-foreground">Try:</span>
-          {suggestions.map((s) => (
+          {suggestions &&suggestions.map((s) => (
             <button
               key={s}
               type="button"

@@ -70,7 +70,10 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
   return (
     <div className=" flex flex-col justify-between gap-8">
       <Navbar />
-      {category && <Categoryhero category={category} />}
+      <div className="-mx-5 -mt-5">
+       {category && <Categoryhero category={category} />} 
+      </div>
+      
 
       <SongCarousel
         eyebrow="Trending right now"

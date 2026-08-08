@@ -3,13 +3,11 @@
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import { SectionHeading } from "./section-heading";
-import { useRecently } from "@/hooks/songs/useRecentlyPlayedSongs";
+
 import { Song } from "@/types";
 
-export function RecentlyPlayed() {
-  const { data } = useRecently();
+export function RecentlyPlayed({songs}:{songs:Song[]}) {
 
-  const songs: Song[] = data?.data.content || [];
   return (
     <section aria-labelledby="recently-played-heading">
       <SectionHeading

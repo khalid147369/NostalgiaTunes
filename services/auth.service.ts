@@ -1,4 +1,4 @@
-import { AuthDTO, UserDTO } from "@/types";
+import { AuthDTO, UserDTO, UserReqDto } from "@/types";
 import { api } from "./api";
 
 export const AuthService = {
@@ -15,6 +15,12 @@ export const AuthService = {
   },
   async me(): Promise<UserDTO> {
     const { data } = await api.get<UserDTO>("/users/me");
+    return data;
+  },
+
+  async update(user: UserReqDto | FormData): Promise<UserDTO> {
+    
+    const { data } = await api.put<UserDTO>("/users", user);
     return data;
   },
 };

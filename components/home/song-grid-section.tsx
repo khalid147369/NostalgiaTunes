@@ -6,6 +6,7 @@ import { SectionHeading } from "@/components/home/section-heading";
 import { SongCard } from "@/components/song/song-card";
 import { useRecently } from "@/hooks/songs/useRecentlySongs";
 import { SongCardSkeleton } from "../loadingScreen/SkeletonCard";
+import { useEffect, useState } from "react";
 
 interface SongGridSectionProps {
   id?: string;
@@ -20,46 +21,77 @@ export function SongGridSection({
   title,
   description,
 }: SongGridSectionProps) {
-  const { data, isLoading } = useRecently();
 
-  const songs: Song[] = data?.data.content ?? [];
-  return (
-    <section
-      id={id}
-      className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6"
-    >
-      <SectionHeading
-        eyebrow={eyebrow}
-        title={title}
-        description={description}
-      />
-      <motion.div
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-60px" }}
-        variants={{
-          hidden: {},
-          show: { transition: { staggerChildren: 0.05 } },
-        }}
-        className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
+  const [songs,setSongs]=useState<Song[]>([]);
+  const [isShowedAll,setIsShowedAll]=useState<Boolean>(false);
+
+  const { mutateAsync, isPending:isLoading } = useRecently();
+
+ const getrecentlySongs=async(size:number)=>{
+        const {data} = await mutateAsync(size);
+
+        setSongs(data?.content)
+      }
+  useEffect(()=>{
+     
+      getrecentlySongs(10)
+  },[])
+
+ 
+
+  const handleShowAll = ()=>{
+    setIsShowedAll(!isShowedAll)
+    isShowedAll?
+    getrecentlySongs(10)
+    :
+    getrecentlySongs(20);
+  }
+  return <>
+    {songs?.length > 0 ? (
+      <section
+        id={id}
+        className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6"
       >
-        {isLoading
-          ? Array.from({ length: 6 }).map((_, i) => (
-              <SongCardSkeleton key={i} />
-            ))
-          : songs.map((song) => (
-            song.isNew&&
-              <motion.div
-                key={song.id}
-                variants={{
-                  hidden: { opacity: 0, y: 24 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-                }}
-              >
-                <SongCard song={song} />
-              </motion.div>
-            ))}
-      </motion.div>
-    </section>
-  );
+        <SectionHeading
+          eyebrow={eyebrow}
+          title={title}
+          description={description}
+          handleShowAll={handleShowAll}
+          isShowedAll={isShowedAll}
+        />
+        <motion.div
+          whileInView="show"
+          viewport={{ once: true, margin: "-60px" }}
+          variants={{
+            hidden: {},
+            show: { transition: { staggerChildren: 0.05 } },
+          }}
+          className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
+        >
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <SongCardSkeleton key={i} />
+              ))
+            : songs.map(
+                (song) =>
+                  song.isNew && (
+                    <motion.div
+                      key={song.id}
+                      variants={{
+                        hidden: { opacity: 0, y: 24 },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          transition: { duration: 0.5 },
+                        },
+                      }}
+                    >
+                      <SongCard song={song} />
+                    </motion.div>
+                  ),
+              )}
+        </motion.div>
+      </section>
+    ):""}
+  </>;
 }

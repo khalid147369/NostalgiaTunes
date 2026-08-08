@@ -31,13 +31,13 @@ const item = {
 
 export function Categoryhero({ category }: { category: CategoryDTO }) {
   const [value, setValue] = useState("");
-
+const [trending, setTrending] = useState<Song[]>([]);
   const router = useRouter();
 
   const [songs, setsongs] = useState([]);
 
   const { play } = usePlayer();
-  const { data: trending } = useTrending();
+  const { mutateAsync:getTrendingAsync } = useTrending();
   const { mutateAsync } = usesearch();
 
   const stats = [
@@ -47,7 +47,7 @@ export function Categoryhero({ category }: { category: CategoryDTO }) {
     },
     { value: "6", label: "Universes" },
   ];
-  const featuredSong = trending?.data.content[0] || {};
+  const featuredSong = trending[0] || {};
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -70,6 +70,14 @@ export function Categoryhero({ category }: { category: CategoryDTO }) {
 
     return () => clearTimeout(timer);
   }, [value]);
+
+  useEffect(() => {
+        const getTrending = async ()=>{
+      const {data} = await getTrendingAsync(Number(category.id));
+      setTrending(data.content)
+    }
+getTrending();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -154,6 +162,7 @@ export function Categoryhero({ category }: { category: CategoryDTO }) {
               handleChange={handleChange}
               value={value}
               placeholder={`Search a ${category.nombre} song you loved...`}
+              trending={trending}
             />
             <SearchResults
               open={value.length > 0}

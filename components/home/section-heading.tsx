@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowDown, ArrowRight } from 'lucide-react'
 import { Reveal } from '@/components/motion/reveal'
 
 interface SectionHeadingProps {
@@ -10,6 +10,8 @@ interface SectionHeadingProps {
   description?: string
   actionLabel?: string
   actionHref?: string
+  handleShowAll:()=>void,
+  isShowedAll:boolean
 }
 
 export function SectionHeading({
@@ -18,6 +20,8 @@ export function SectionHeading({
   description,
   actionLabel = 'See all',
   actionHref = '#',
+  handleShowAll,
+  isShowedAll
 }: SectionHeadingProps) {
   return (
     <Reveal className="mb-6 flex items-end justify-between gap-6">
@@ -36,13 +40,23 @@ export function SectionHeading({
           </p>
         ) : null}
       </div>
-      <Link
-        href={actionHref}
-        className="group hidden shrink-0 items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground sm:inline-flex"
+      <div
+        onClick={handleShowAll}
+        className=" cursor-pointer group hidden shrink-0 items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground sm:inline-flex"
       >
-        {actionLabel}
-        <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-      </Link>
+        {isShowedAll ? (
+          <>
+            <span>Show Less</span>
+            <ArrowDown className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </>
+        ) : (
+          <>
+            <span>{actionLabel}</span>
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </>
+        )}
+
+      </div>
     </Reveal>
   )
 }

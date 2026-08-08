@@ -1,78 +1,66 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Heart, MessageCircle, Reply, Send } from 'lucide-react'
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Heart, MessageCircle, Reply, Send } from "lucide-react";
+import { useGetComments } from "@/hooks/comments/useComment";
+import { Comment, Song } from "@/types";
+import { useSendComment } from "@/hooks/comments/useSendComment";
+import { timeAgo } from "@/lib/utils";
 
-interface Comment {
-  id: string
-  username: string
-  initials: string
-  date: string
-  text: string
-  likes: number
-}
+export function CommentsSection({ song }: { song: Song }) {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [draft, setDraft] = useState("");
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
 
-const initialComments: Comment[] = [
-  {
-    id: 'cm1',
-    username: 'retro_kid_98',
-    initials: 'RK',
-    date: '3 days ago',
-    text: 'This opening still gives me chills. Instant time travel to 1998.',
-    likes: 214,
-  },
-  {
-    id: 'cm2',
-    username: 'saturday_morning',
-    initials: 'SM',
-    date: '1 week ago',
-    text: 'I used to hum this on the way to school every single day. My whole childhood in one melody.',
-    likes: 156,
-  },
-  {
-    id: 'cm3',
-    username: 'vhs_dreamer',
-    initials: 'VD',
-    date: '2 weeks ago',
-    text: 'The moment the guitar kicks in... nobody does openings like this anymore.',
-    likes: 98,
-  },
-]
+  const { mutateAsync: getCommentsAsync } = useGetComments();
+  const { mutateAsync: sendCommentsAsync } = useSendComment();
+  useEffect(() => {
+    const getComments = async () => {
+      const { data } = await getCommentsAsync(Number(song.id));
 
-export function CommentsSection() {
-  const [comments, setComments] = useState(initialComments)
-  const [draft, setDraft] = useState('')
-  const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
+      console.log("Comments: ", data);
 
-  const submit = () => {
-    const text = draft.trim()
-    if (!text) return
+      setComments(data);
+    };
+    getComments();
+  }, []);
+
+  const submit = async () => {
+    const text = draft.trim();
+    if (!text) return;
+    let comment = {
+      id: Number(song.id),
+      text: { text },
+    };
+    const { data } = await sendCommentsAsync(comment);
+    const newComment :Comment=data;
+    console.log("Comment sended: ", data);
     setComments((prev) => [
       {
-        id: `cm-${Date.now()}`,
-        username: 'you',
-        initials: 'YO',
-        date: 'Just now',
+        id: Number(newComment.id),
+        creator: newComment.creator,
+        initials: newComment.creator.substring(0,2),
+        date: "Just now",
         text,
         likes: 0,
-      },
+      } as Comment,
       ...prev,
-    ])
-    setDraft('')
-  }
+    ]);
+    setDraft("");
+  };
 
   const toggleLike = (id: string) => {
     setLikedIds((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(id)) {
-        next.delete(id)
+        next.delete(id);
       } else {
-        next.add(id)
+        next.add(id);
       }
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
   return (
     <section aria-label="Comments" className="relative z-10 px-4 py-10 md:px-6">
@@ -80,8 +68,8 @@ export function CommentsSection() {
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="flex flex-col gap-8"
         >
           <div className="flex items-center gap-3">
@@ -105,13 +93,13 @@ export function CommentsSection() {
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
                 if (
-                  e.key === 'Enter' &&
+                  e.key === "Enter" &&
                   !e.shiftKey &&
                   !e.nativeEvent.isComposing &&
                   e.keyCode !== 229
                 ) {
-                  e.preventDefault()
-                  submit()
+                  e.preventDefault();
+                  submit();
                 }
               }}
               placeholder="What memory does this song bring back?"
@@ -136,13 +124,13 @@ export function CommentsSection() {
           {/* Comments list */}
           <ul className="flex flex-col gap-4">
             {comments.map((comment, i) => {
-              const liked = likedIds.has(comment.id)
+              const liked = likedIds.has(comment.id.toString());
               return (
                 <motion.li
                   key={comment.id}
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-20px' }}
+                  viewport={{ once: true, margin: "-20px" }}
                   transition={{ duration: 0.45, delay: i * 0.08 }}
                   className="glass flex gap-4 rounded-3xl p-5 md:p-6"
                 >
@@ -150,15 +138,13 @@ export function CommentsSection() {
                     aria-hidden="true"
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/25 text-sm font-bold text-primary"
                   >
-                    {comment.initials}
+                    {comment.avatar ?? comment.creator.substring(0,2)}
                   </span>
                   <div className="flex min-w-0 flex-col gap-2">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span className="font-semibold">
-                        @{comment.username}
-                      </span>
+                      <span className="font-semibold">@{comment.creator}</span>
                       <span className="text-xs text-muted-foreground">
-                        {comment.date}
+                        {timeAgo(comment.date)}
                       </span>
                     </div>
                     <p className="text-sm leading-relaxed text-muted-foreground">
@@ -167,18 +153,18 @@ export function CommentsSection() {
                     <div className="mt-1 flex items-center gap-4">
                       <button
                         type="button"
-                        onClick={() => toggleLike(comment.id)}
+                        onClick={() => toggleLike(comment.id.toString())}
                         aria-pressed={liked}
                         className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
                           liked
-                            ? 'text-primary'
-                            : 'text-muted-foreground hover:text-foreground'
+                            ? "text-primary"
+                            : "text-muted-foreground hover:text-foreground"
                         }`}
                       >
                         <Heart
-                          className={`h-3.5 w-3.5 ${liked ? 'fill-primary' : ''}`}
+                          className={`h-3.5 w-3.5 ${liked ? "fill-primary" : ""}`}
                         />
-                        {comment.likes + (liked ? 1 : 0)}
+                        {comment.likes ?? 0 + (liked ? 1 : 0)}
                       </button>
                       <button
                         type="button"
@@ -190,11 +176,11 @@ export function CommentsSection() {
                     </div>
                   </div>
                 </motion.li>
-              )
+              );
             })}
           </ul>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

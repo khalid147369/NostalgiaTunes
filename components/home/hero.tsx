@@ -32,6 +32,7 @@ const item = {
 export function Hero() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [value, setValue] = useState("");
+  const [featuredSongs, setFeaturedSongs] = useState<Song[]>([]);
 
   const router = useRouter();
 
@@ -42,7 +43,7 @@ export function Hero() {
 
   const { data } = useCounts();
   const { play } = usePlayer();
-  const { data: trending } = useTrending();
+  const { mutateAsync:getTrendingAsync} = useTrending();
   const { mutateAsync } = usesearch();
 
   const stats = [
@@ -50,7 +51,7 @@ export function Hero() {
     { value: "6", label: "Universes" },
     { value: `${data?.totalPlays}`, label: "Memories replayed" },
   ];
-  const featuredSong = trending?.data.content[0] || {};
+  const featuredSong = featuredSongs[0] || {};
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -73,6 +74,18 @@ export function Hero() {
 
     return () => clearTimeout(timer);
   }, [value, selectedCategory]);
+
+
+  useEffect(()=>{
+
+    const getTrending = async ()=>{
+      const {data} = await getTrendingAsync(undefined);
+      console.log(data.content);
+      setFeaturedSongs(data.content)
+    }
+getTrending();
+
+  },[])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -153,7 +166,7 @@ export function Hero() {
           </motion.div>
 
           <motion.div variants={item} className="mt-10">
-            <SearchBar handleChange={handleChange} value={value} placeholder="Search a cartoon, anime or song you loved..." />
+            <SearchBar handleChange={handleChange} value={value} trending={featuredSongs} placeholder="Search a cartoon, anime or song you loved..." />
             <SearchResults
               open={value.length > 0}
               songs={songs}

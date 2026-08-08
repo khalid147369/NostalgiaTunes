@@ -5,10 +5,14 @@ import { motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
 import { formatNumber, songs } from '@/lib/mock-data'
 import { SectionHeader } from './section-header'
+import { useMostLikedSongs } from '@/hooks/songs/useMostLikedSongs'
+import { Song } from '@/types'
 
 export function FavoritesSection() {
-  const ranked = [...songs].sort((a, b) => b.likes - a.likes).slice(0, 6)
+ // const ranked = [...songs].sort((a, b) => b.likes - a.likes).slice(0, 6)
 
+  const {data} = useMostLikedSongs();
+  const songs : Song[] = data?.data?.content ?? [];
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -24,7 +28,7 @@ export function FavoritesSection() {
         className="glass overflow-hidden rounded-2xl"
       >
         <ol>
-          {ranked.map((song, i) => (
+          {songs.map((song, i) => (
             <li
               key={song.id}
               className="flex items-center gap-4 border-b border-border px-5 py-4 transition-colors last:border-0 hover:bg-secondary/40"

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState, type FormEvent } from "react";
 import { ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/adminUi/button";
 import {
@@ -19,8 +20,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/adminUi/select";
-import { Textarea } from "@/components/ui/adminUi/textarea";
-import { categories } from "@/lib/mock-data";
+import { CategorySlug, SongDto } from "@/types";
+import { useAddSong } from "@/hooks/songs/useAddSong";
+
+const categoryOptions = [
+  [CategorySlug.Spacetoon, "Spacetoon"],
+  [CategorySlug.Spacepower, "Spacepower"],
+  [CategorySlug.CartoonNetwork, "Cartoon Network"],
+  [CategorySlug.Anime, "Anime"],
+  [CategorySlug.AnotherChannels, "Another Channels"],
+  [CategorySlug.MBC3, "MBC3"],
+] as const;
+
+function createInitialForm(): SongDto {
+  return {
+    title: "",
+    cartoon: "",
+    category: 0,
+    imageFile: new File([], ""),
+    audioFile: new File([], ""),
+  };
+}
 
 export function AddSongDialog({
   open,
@@ -29,6 +49,50 @@ export function AddSongDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const [songForm, setSongForm] = useState<SongDto>(createInitialForm);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const { mutateAsync: addSong, isPending } = useAddSong();
+
+  const isFormValid =
+    songForm.title.trim().length > 0 &&
+    songForm.cartoon.trim().length > 0 &&
+    songForm.category > 0 &&
+    songForm.imageFile.size > 0 &&
+    songForm.audioFile.size > 0;
+
+  useEffect(() => {
+    if (songForm.imageFile.size === 0) {
+      setImagePreview(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(songForm.imageFile);
+    setImagePreview(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [songForm.imageFile]);
+
+  function updateField(field: "title" | "cartoon", value: string) {
+    setSongForm((current) => ({ ...current, [field]: value }));
+  }
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!isFormValid || isPending) return;
+
+    const form = new FormData();
+    form.append("title", songForm.title);
+    form.append("cartoon", songForm.cartoon);
+    form.append("category", String(songForm.category));
+    form.append("imageFile", songForm.imageFile);
+    form.append("audioFile", songForm.audioFile);
+
+    const song = await addSong(form);
+    console.log("song", song);
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass max-h-[90vh] overflow-y-auto rounded-2xl border-glass-border sm:max-w-lg">
@@ -44,32 +108,45 @@ export function AddSongDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onOpenChange(false);
-          }}
-        >
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="cover">Cover image</Label>
+            <Label htmlFor="image-file">Cover image</Label>
+
             <label
-              htmlFor="cover"
-              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-glass-border bg-secondary/40 px-4 py-8 text-center transition-colors hover:border-primary/50 hover:bg-secondary/60"
+              htmlFor="image-file"
+              className="relative flex h-52 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-dashed border-glass-border bg-secondary/40 px-4 py-8 text-center transition-colors hover:border-primary/50 hover:bg-secondary/60"
             >
-              <span className="flex size-11 items-center justify-center rounded-full bg-primary/15 text-primary">
-                <ImagePlus className="size-5" />
-              </span>
-              <span className="text-sm font-medium">
-                Drop cover art or click to upload
-              </span>
-              <span className="text-xs text-muted-foreground">
-                PNG or JPG, square, at least 600x600
-              </span>
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Selected cover preview"
+                  className="absolute inset-0 size-full object-contain p-2"
+                />
+              ) : (
+                <>
+                  <span className="flex size-11 items-center justify-center rounded-full bg-primary/15 text-primary">
+                    <ImagePlus className="size-5" />
+                  </span>
+                  <span className="text-sm font-medium">
+                    Drop cover art or click to upload
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    PNG or JPG, square, at least 600x600
+                  </span>
+                </>
+              )}
+
               <input
-                id="cover"
+                id="image-file"
                 type="file"
                 accept="image/*"
+                required
+                onChange={(e) =>
+                  setSongForm((current) => ({
+                    ...current,
+                    imageFile: e.target.files?.[0] ?? current.imageFile,
+                  }))
+                }
                 className="sr-only"
               />
             </label>
@@ -80,6 +157,9 @@ export function AddSongDialog({
             <Input
               id="title"
               placeholder="e.g. Cha-La Head-Cha-La"
+              value={songForm.title}
+              onChange={(e) => updateField("title", e.target.value)}
+              required
               className="h-10 rounded-xl border-glass-border bg-secondary/50 focus-visible:ring-primary/50"
             />
           </div>
@@ -90,12 +170,23 @@ export function AddSongDialog({
               <Input
                 id="cartoon"
                 placeholder="e.g. Dragon Warriors"
+                value={songForm.cartoon}
+                onChange={(e) => updateField("cartoon", e.target.value)}
+                required
                 className="h-10 rounded-xl border-glass-border bg-secondary/50 focus-visible:ring-primary/50"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select>
+              <Select
+                value={songForm.category ? String(songForm.category) : ""}
+                onValueChange={(value) =>
+                  setSongForm((current) => ({
+                    ...current,
+                    category: Number(value),
+                  }))
+                }
+              >
                 <SelectTrigger
                   id="category"
                   className="h-10 w-full rounded-xl border-glass-border bg-secondary/50"
@@ -103,13 +194,13 @@ export function AddSongDialog({
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent className="glass rounded-xl border-glass-border">
-                  {categories.map((c) => (
+                  {categoryOptions.map(([id, name]) => (
                     <SelectItem
-                      key={c.id}
-                      value={c.name}
+                      key={id}
+                      value={String(id)}
                       className="rounded-lg"
                     >
-                      {c.name}
+                      {name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -118,21 +209,18 @@ export function AddSongDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              placeholder="What memory does this song bring back?"
-              rows={3}
-              className="rounded-xl border-glass-border bg-secondary/50 focus-visible:ring-primary/50"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="audio-url">Audio URL</Label>
+            <Label htmlFor="audio-file">Audio file</Label>
             <Input
-              id="audio-url"
-              type="url"
-              placeholder="https://cdn.nostalgiasongs.com/audio/..."
+              id="audio-file"
+              type="file"
+              accept="audio/*"
+              required
+              onChange={(e) =>
+                setSongForm((current) => ({
+                  ...current,
+                  audioFile: e.target.files?.[0] ?? current.audioFile,
+                }))
+              }
               className="h-10 rounded-xl border-glass-border bg-secondary/50 focus-visible:ring-primary/50"
             />
           </div>
@@ -148,9 +236,10 @@ export function AddSongDialog({
             </Button>
             <Button
               type="submit"
+              disabled={!isFormValid || isPending}
               className="glow-primary rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
             >
-              Add Song
+              {isPending ? "Adding..." : "Add Song"}
             </Button>
           </DialogFooter>
         </form>

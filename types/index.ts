@@ -100,10 +100,40 @@ export interface UserDTO {
   fotoPerfil?: String;
 }
 
+export interface UserReqDto {
+  nombre: string;
+  email: string;
+  descreption: string;
+  category: number;
+  fotoPerfil?: File | string;
+}
+
 export interface Stats {
   totalSongs: number;
   totalUsers: number;
   totalPlays: number;
   totalLikes: number;
   totalCommets: number;
+}
+
+export interface Comment {
+  avatar?: number;
+  creator: string;
+  date: string;
+  id: number;
+  songId?: number;
+  songName?: string;
+  text: string;
+  userId?: string;
+  likes?: number;
+  initials?: string;
+  state?: boolean;
+}
+
+export interface SongDto {
+  title: string;
+  cartoon: string;
+  category: number;
+  imageFile: File;
+  audioFile: File;
 }

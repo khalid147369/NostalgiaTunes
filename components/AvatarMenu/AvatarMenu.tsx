@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/adminUi/dropdown-menu";
 
 import { Avatar, AvatarFallback } from "@/components/ui/adminUi/avatar";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/auth/useUser";
 import Link from "next/link";
 import { LoadingScreen } from "../loadingScreen/LoadingScreen";
 
 export default function AvatarMenu() {
-  const { user, logout,loading } = useUser();
+  const { user, logout, loading } = useUser();
 
   return (
     <DropdownMenu>

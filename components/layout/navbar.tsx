@@ -6,17 +6,16 @@ import { motion } from "framer-motion";
 import { Disc3, Menu, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "../logo/logo";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/auth/useUser";
 import AvatarMenu from "../AvatarMenu/AvatarMenu";
 import { NavbarSkeleton } from "../loadingScreen/navBarSkeleton";
 import { useRouter } from "next/navigation";
 import { useSearchFocus } from "@/providers/searchProvider";
 
-
 const links = [
   { label: "Home", href: "/" },
-  { label: "Categories", href: "#categories" },
-  { label: "Trending", href: "#trending" },
+  { label: "Categories", href: "/#categories" },
+  { label: "Trending", href: "/#trending" },
   { label: "Favorites", href: "/profile/#favorite-songs-heading" },
 ];
 
@@ -25,7 +24,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
-  const { setFocus,focus } = useSearchFocus();
+  const { setFocus, focus } = useSearchFocus();
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
@@ -66,7 +65,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
-              (router.push("/#search"), setFocus(!focus));
+              (router.push("#search"), setFocus(!focus));
             }}
             type="button"
             aria-label="Search"

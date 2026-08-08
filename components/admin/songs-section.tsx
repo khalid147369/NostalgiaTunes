@@ -6,8 +6,10 @@ import { Headphones, Heart, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/adminUi/badge'
 import { Button } from '@/components/ui/adminUi/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/adminUi/table'
-import { formatNumber, songs, type SongStatus } from '@/lib/mock-data'
+import { formatNumber, type SongStatus } from '@/lib/mock-data'
 import { SectionHeader } from './section-header'
+import { useSongs } from '@/hooks/songs/useSong'
+import { Song } from '@/types'
 
 const statusStyles: Record<SongStatus, string> = {
   published: 'border-accent/30 bg-accent/10 text-accent',
@@ -16,6 +18,8 @@ const statusStyles: Record<SongStatus, string> = {
 }
 
 export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
+  const {data} = useSongs();
+  const songs :Song[] = data?.data.content ?? [];
   return (
     <div className="space-y-6">
       <SectionHeader

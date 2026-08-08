@@ -12,18 +12,29 @@ import { useTrending } from "@/hooks/songs/useTrendingSongs";
 import { useMostListended } from "@/hooks/songs/useMostListenedSongs";
 import { Song } from "@/types";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export function OverviewSection() {
+
+  const [recentlySong, setRecentlySong] = useState<Song[]>([]);
+
   const topSongs = [...songs].sort((a, b) => b.listens - a.listens).slice(0, 5);
 
-  const { data: recentlyAdedSongs } = useRecently();
+  const { mutateAsync:recentlyAdedSongs } = useRecently();
   const { data: mostListenedSongs } = useMostListended();
 
-  const recentlyAded: Song[] = recentlyAdedSongs?.data.content || [];
+  
 
   const mostListened: Song[] = mostListenedSongs?.data.content || [];
-
-  console.log(recentlyAded);
+const getRecentlySongs = async ()=>{
+  const {data} = await recentlyAdedSongs(undefined);
+  setRecentlySong(data?.content??[])
+    }
+  useEffect(()=>{
+    
+getRecentlySongs()
+  },[])
+  console.log(recentlySong);
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -107,7 +118,7 @@ export function OverviewSection() {
             New memories digitized this week.
           </p>
           <ul className="space-y-3">
-            {recentlyAded.map(
+            {recentlySong.map(
               (song) =>
                 song.isNew && (
                   <li key={song.id} className="flex items-center gap-3">
