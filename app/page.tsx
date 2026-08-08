@@ -3,14 +3,11 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { MusicPlayer } from "@/components/player/music-player";
 import { Hero } from "@/components/home/hero";
-import { ContinueListening } from "@/components/home/continue-listening";
 import { FeaturedSong } from "@/components/home/featured-song";
 import { CategoriesSection } from "@/components/home/categories-section";
 import { SongCarousel } from "@/components/home/song-carousel";
 import { SongGridSection } from "@/components/home/song-grid-section";
 import { MostListened } from "@/components/home/most-listened";
-import { trendingSongs, recentlyAddedSongs } from "@/lib/mock-data";
-import { SearchFocusProvider } from "@/providers/searchProvider";
 
 export default function HomePage() {
   return (
