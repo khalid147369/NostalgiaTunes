@@ -3,6 +3,7 @@ import { AmbientBackground } from '@/components/ui/ambient-background';
 import { MusicPlayer as AbsuluteMusicPlayer } from '@/components/player/music-player'
 import React from 'react';
 import { Navbar } from '@/components/layout/navbar';
+import Loading from '@/app/loading';
 
 
 
@@ -16,7 +17,7 @@ export default async  function CategoryPage({ params }: CategoryPageProps){
     return (
         <div className=' p-5'>
                 <AmbientBackground />
-              
+                <Loading/>
                 <SingleCategory id={id}/>
                 <AbsuluteMusicPlayer />
         </div>

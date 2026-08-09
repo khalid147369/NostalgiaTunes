@@ -31,7 +31,7 @@ export function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  const { user, loading } = useUser();
+  const { user, loading, logout } = useUser();
   if (loading) {
     return <NavbarSkeleton />;
   }
@@ -54,7 +54,7 @@ export function Navbar() {
           {links.map((link) => (
             <Link
               key={link.label}
-              href={link.href}
+              href={link.label==="Favorites"&& !user?"/register":link.href}
               className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
             >
               {link.label}
@@ -77,7 +77,7 @@ export function Navbar() {
             <AvatarMenu />
           ) : (
             <Link
-              href="/register"
+              href="/login"
               className="hidden rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-transform hover:scale-[1.03] sm:inline-flex"
             >
               Sign in
@@ -104,13 +104,60 @@ export function Navbar() {
           {links.map((link) => (
             <Link
               key={link.label}
-              href={link.href}
+              href={link.label==="Favorites"&& !user?"/register":link.href}
               onClick={() => setOpen(false)}
               className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
             >
               {link.label}
             </Link>
           ))}
+
+          <div className="mt-2 border-t border-border pt-2">
+            {user ? (
+              <>
+                <p className="px-4 py-2 text-xs text-muted-foreground">
+                  Signed in as{" "}
+                  <span className="font-medium text-foreground">
+                    {user.nombre}
+                  </span>
+                </p>
+                <Link
+                  href="/profile"
+                  onClick={() => setOpen(false)}
+                  className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                >
+                  Profile
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    setOpen(false);
+                  }}
+                  className="block w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-rose-300 transition-colors hover:bg-rose-950/30"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setOpen(false)}
+                  className="mt-1 block rounded-xl bg-foreground px-4 py-3 text-sm font-semibold text-background transition-transform hover:scale-[1.01]"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
+          </div>
         </motion.div>
       ) : null}
     </motion.header>

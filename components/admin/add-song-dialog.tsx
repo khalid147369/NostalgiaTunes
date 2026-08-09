@@ -20,8 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/adminUi/select";
-import { CategorySlug, SongDto } from "@/types";
+import { CategorySlug, Song, SongDto, SongStatus } from "@/types";
 import { useAddSong } from "@/hooks/songs/useAddSong";
+import { useUpdateSong } from "@/hooks/songs/useUpdateSong";
 
 const categoryOptions = [
   [CategorySlug.Spacetoon, "Spacetoon"],
@@ -32,6 +33,12 @@ const categoryOptions = [
   [CategorySlug.MBC3, "MBC3"],
 ] as const;
 
+const statusOptions: Array<[SongStatus, string]> = [
+  ["draft", "DRAFT"],
+  ["published", "PUBLISHED"],
+  ["archived", "ARCHIVED"],
+];
+
 function createInitialForm(): SongDto {
   return {
     title: "",
@@ -39,31 +46,76 @@ function createInitialForm(): SongDto {
     category: 0,
     imageFile: new File([], ""),
     audioFile: new File([], ""),
+    status: undefined,
+  };
+}
+
+function createFormFromSong(song: Song): SongDto {
+  return {
+    title: song.title,
+    cartoon: song.cartoon,
+    category: song.category,
+    imageFile: new File([], ""),
+    audioFile: new File([], ""),
+    status: song.status,
   };
 }
 
 export function AddSongDialog({
   open,
   onOpenChange,
+  mode = "add",
+  song,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode?: "add" | "update";
+  song?: Song | null;
 }) {
   const [songForm, setSongForm] = useState<SongDto>(createInitialForm);
+  const [initialForm, setInitialForm] = useState<SongDto>(createInitialForm);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { mutateAsync: addSong, isPending } = useAddSong();
+  const { mutateAsync: updateSong, isPending: isUpdating } = useUpdateSong();
+  const isUpdateMode = mode === "update" && !!song;
+  const isSubmitting = isPending || isUpdating;
 
-  const isFormValid =
-    songForm.title.trim().length > 0 &&
-    songForm.cartoon.trim().length > 0 &&
-    songForm.category > 0 &&
-    songForm.imageFile.size > 0 &&
+  useEffect(() => {
+    if (open && isUpdateMode) {
+      const form = createFormFromSong(song);
+      setSongForm(form);
+      setInitialForm(form);
+      setImagePreview(song.cover || null);
+      return;
+    }
+
+    if (open) {
+      const form = createInitialForm();
+      setSongForm(form);
+      setInitialForm(form);
+      setImagePreview(null);
+    }
+  }, [open, isUpdateMode, song]);
+
+  const hasChanges =
+    songForm.title !== initialForm.title ||
+    songForm.cartoon !== initialForm.cartoon ||
+    songForm.category !== initialForm.category ||
+    songForm.status !== initialForm.status ||
+    songForm.imageFile.size > 0 ||
     songForm.audioFile.size > 0;
+
+  const isFormValid = isUpdateMode
+    ? hasChanges
+    : songForm.title.trim().length > 0 &&
+      songForm.cartoon.trim().length > 0 &&
+      songForm.category > 0 &&
+      songForm.imageFile.size > 0 &&
+      songForm.audioFile.size > 0;
 
   useEffect(() => {
     if (songForm.imageFile.size === 0) {
-      setImagePreview(null);
       return;
     }
 
@@ -79,17 +131,32 @@ export function AddSongDialog({
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!isFormValid || isPending) return;
+    if (!isFormValid || isSubmitting) return;
 
     const form = new FormData();
-    form.append("title", songForm.title);
-    form.append("cartoon", songForm.cartoon);
-    form.append("category", String(songForm.category));
-    form.append("imageFile", songForm.imageFile);
-    form.append("audioFile", songForm.audioFile);
 
-    const song = await addSong(form);
-    console.log("song", song);
+    if (isUpdateMode) {
+      if (songForm.title !== initialForm.title)
+        form.append("title", songForm.title);
+      if (songForm.cartoon !== initialForm.cartoon)
+        form.append("cartoon", songForm.cartoon);
+      if (songForm.category !== initialForm.category)
+        form.append("category", String(songForm.category));
+      if (songForm.status !== initialForm.status && songForm.status)
+        form.append("status", songForm.status.toUpperCase());
+      if (songForm.imageFile.size > 0)
+        form.append("imageFile", songForm.imageFile);
+      if (songForm.audioFile.size > 0)
+        form.append("audioFile", songForm.audioFile);
+      await updateSong({ id: Number(song.id), song: form });
+    } else {
+      form.append("title", songForm.title);
+      form.append("cartoon", songForm.cartoon);
+      form.append("category", String(songForm.category));
+      form.append("imageFile", songForm.imageFile);
+      form.append("audioFile", songForm.audioFile);
+       await addSong(form);
+    }
     onOpenChange(false);
   };
 
@@ -98,10 +165,10 @@ export function AddSongDialog({
       <DialogContent className="glass max-h-[90vh] overflow-y-auto rounded-2xl border-glass-border sm:max-w-lg">
         <DialogHeader>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-            New Memory
+            {isUpdateMode ? "Edit Memory" : "New Memory"}
           </p>
           <DialogTitle className="font-heading text-xl font-bold">
-            Add Song
+            {isUpdateMode ? "Update Song" : "Add Song"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             Digitize a new theme and add it to the archive.
@@ -140,7 +207,7 @@ export function AddSongDialog({
                 id="image-file"
                 type="file"
                 accept="image/*"
-                required
+                required={!isUpdateMode}
                 onChange={(e) =>
                   setSongForm((current) => ({
                     ...current,
@@ -159,7 +226,7 @@ export function AddSongDialog({
               placeholder="e.g. Cha-La Head-Cha-La"
               value={songForm.title}
               onChange={(e) => updateField("title", e.target.value)}
-              required
+              required={!isUpdateMode}
               className="h-10 rounded-xl border-glass-border bg-secondary/50 focus-visible:ring-primary/50"
             />
           </div>
@@ -172,7 +239,7 @@ export function AddSongDialog({
                 placeholder="e.g. Dragon Warriors"
                 value={songForm.cartoon}
                 onChange={(e) => updateField("cartoon", e.target.value)}
-                required
+                required={!isUpdateMode}
                 className="h-10 rounded-xl border-glass-border bg-secondary/50 focus-visible:ring-primary/50"
               />
             </div>
@@ -214,7 +281,7 @@ export function AddSongDialog({
               id="audio-file"
               type="file"
               accept="audio/*"
-              required
+              required={!isUpdateMode}
               onChange={(e) =>
                 setSongForm((current) => ({
                   ...current,
@@ -224,6 +291,39 @@ export function AddSongDialog({
               className="h-10 rounded-xl border-glass-border bg-secondary/50 focus-visible:ring-primary/50"
             />
           </div>
+
+          {isUpdateMode && (
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={songForm.status ?? ""}
+                onValueChange={(value) =>
+                  setSongForm((current) => ({
+                    ...current,
+                    status: value as SongStatus,
+                  }))
+                }
+              >
+                <SelectTrigger
+                  id="status"
+                  className="h-10 w-full rounded-xl border-glass-border bg-secondary/50"
+                >
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent className="glass rounded-xl border-glass-border">
+                  {statusOptions.map(([value, label]) => (
+                    <SelectItem
+                      key={value}
+                      value={value}
+                      className="rounded-lg"
+                    >
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <DialogFooter className="gap-2 pt-2 sm:gap-0">
             <Button
@@ -239,7 +339,13 @@ export function AddSongDialog({
               disabled={!isFormValid || isPending}
               className="glow-primary rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
             >
-              {isPending ? "Adding..." : "Add Song"}
+              {isSubmitting
+                ? isUpdateMode
+                  ? "Updating..."
+                  : "Adding..."
+                : isUpdateMode
+                  ? "Update Song"
+                  : "Add Song"}
             </Button>
           </DialogFooter>
         </form>

@@ -5,7 +5,7 @@ import { SongHero } from "./song-hero";
 import { SongStats } from "./song-stats";
 import { AboutSong } from "./about-song";
 import { useSinglSong } from "@/hooks/songs/useSinglSong";
-import { Song, SongFilters } from "@/types";
+import { CategorySlug, Song, SongFilters } from "@/types";
 import { NostalgiaCta } from "./nostalgia-cta";
 import { SongCarousel } from "@/components/song/song-carousel";
 import { CommentsSection } from "@/components/song/comments-section";
@@ -29,19 +29,26 @@ const SingleSong = ({ songId }: SongId) => {
 
   const getSong = async () => {
     const { data } = await mutateAsync(songId);
+    console.log("==============", data);
     setSong(data);
   };
 
   const getRelatedSongs = async () => {
+    if (song?.category == null) return;
+
+    console.log("category Song", song?.category?.toString());
     const { data } = await relatedSongsMute({
       column: SongFilters.category,
       size: 10,
+      value:
+        CategorySlug[
+          song.category.toString() as keyof typeof CategorySlug
+        ].toString(),
     });
     setRelatedSongs(data);
 
     return data;
   };
- 
 
   const getTrendingSongs = async () => {
     const { data } = await trending(undefined);
@@ -52,9 +59,12 @@ const SingleSong = ({ songId }: SongId) => {
 
   useEffect(() => {
     getSong();
-    getRelatedSongs();
     getTrendingSongs();
   }, []);
+
+  useEffect(() => {
+    getRelatedSongs();
+  }, [song]);
 
   const alsoLikeSongs = trendingSongs;
   return (

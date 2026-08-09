@@ -136,4 +136,5 @@ export interface SongDto {
   category: number;
   imageFile: File;
   audioFile: File;
+  status?: SongStatus;
 }

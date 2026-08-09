@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SongService } from "@/services/song.service";
 
-export function useAddSong() {
+export function useDeleteSong() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (song: FormData) => SongService.create(song),
+    mutationFn: (id: number) => SongService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["songs"] });
     },

@@ -7,12 +7,16 @@ import { useGetComments } from "@/hooks/comments/useComment";
 import { Comment, Song } from "@/types";
 import { useSendComment } from "@/hooks/comments/useSendComment";
 import { timeAgo } from "@/lib/utils";
+import { useUser } from "@/hooks/auth/useUser";
+import { useRouter } from "next/navigation";
 
 export function CommentsSection({ song }: { song: Song }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [draft, setDraft] = useState("");
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
 
+  const {user} = useUser();
+  const router = useRouter()
   const { mutateAsync: getCommentsAsync } = useGetComments();
   const { mutateAsync: sendCommentsAsync } = useSendComment();
   useEffect(() => {
@@ -27,6 +31,10 @@ export function CommentsSection({ song }: { song: Song }) {
   }, []);
 
   const submit = async () => {
+      if (!user) {
+      router.push("/register");
+      return;
+    }
     const text = draft.trim();
     if (!text) return;
     let comment = {

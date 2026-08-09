@@ -4,6 +4,7 @@ import "./panel.css";
 import { useUser } from "@/hooks/auth/useUser";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Loading from "../loading";
 
 export default function Page() {
   const { user, loading } = useUser();
@@ -15,13 +16,10 @@ export default function Page() {
     }
   }, [loading, user, router]);
 
-  if (loading) {
-    return <p>..loading</p>;
-  }
 
   if (!user || user.role !== "ADMIN") {
     return null;
   }
 
-  return <AdminDashboard />;
+  return <><Loading/><AdminDashboard /></>;
 }

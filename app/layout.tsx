@@ -44,17 +44,14 @@ export default function RootLayout({
       className={`dark bg-background ${inter.variable} ${sora.variable} `}
     >
       <body className="font-sans antialiased">
-         <LoadingSkeleton/> 
-         <PlayerProvider>
-          <SearchFocusProvider>
-           <AuthProvider>
-          <Providers>{children}</Providers>
+        <LoadingSkeleton />{" "}
+        <AuthProvider>
+          <PlayerProvider>
+            <SearchFocusProvider>
+              <Providers>{children}</Providers>
+            </SearchFocusProvider>
+          </PlayerProvider>
         </AuthProvider>
-         </SearchFocusProvider>
-         </PlayerProvider>
-         
-       
-
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

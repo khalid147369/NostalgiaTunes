@@ -7,16 +7,16 @@ type FilterSongParams = {
   column?: SongFilters;
   direction?: string;
   size?: number;
+  value?: string;
 };
 export function useFilterSong() {
   return useMutation({
-    mutationFn: (
-      params: FilterSongParams
-    ): Promise<AxiosResponse<Song[]>> =>
+    mutationFn: (params: FilterSongParams): Promise<AxiosResponse<Song[]>> =>
       SongService.filterSongs(
         params.column,
         params.direction,
-        params.size
+        params.size,
+        params.value,
       ),
   });
 }

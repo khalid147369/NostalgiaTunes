@@ -11,6 +11,8 @@ import {
   type ReactNode,
 } from "react";
 import type { Song } from "@/types";
+import { useUser } from "@/hooks/auth/useUser";
+import { useRouter } from "next/navigation";
 
 interface PlayerContextValue {
   currentSong: Song | null;
@@ -19,7 +21,7 @@ interface PlayerContextValue {
   currentTime: number;
 
   likedIds: Set<string>;
-  SavedSongIds : Set<string>;
+  SavedSongIds: Set<string>;
   play(song: Song): void;
   pause(): void;
   resume(): void;
@@ -39,6 +41,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
 
+  const { user } = useUser();
+  const router = useRouter();
+
   const [likedIds, setLikedIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set<string>();
 
@@ -53,7 +58,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   });
 
-    const [SavedSongIds, setSavedsongIds] = useState<Set<string>>(() => {
+  const [SavedSongIds, setSavedsongIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set<string>();
 
     const storedSaves = localStorage.getItem("SavedSongs");
@@ -144,6 +149,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleLike = useCallback((id: string) => {
+    if (!user) {
+      router.push("/register");
+      return;
+    }
     setLikedIds((prev) => {
       const next = new Set(prev);
 
@@ -157,7 +166,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-    const toggleSavedSong = useCallback((id: string) => {
+  const toggleSavedSong = useCallback((id: string) => {
+    if (!user) {
+      router.push("/register");
+      return;
+    }
     setSavedsongIds((prev) => {
       const next = new Set(prev);
 
@@ -189,7 +202,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       toggleSavedSong,
       close,
     }),
-    [currentSong, isPlaying, currentTime, likedIds, play, toggleLike,SavedSongIds,toggleSavedSong],
+    [
+      currentSong,
+      isPlaying,
+      currentTime,
+      likedIds,
+      play,
+      toggleLike,
+      SavedSongIds,
+      toggleSavedSong,
+    ],
   );
 
   return (

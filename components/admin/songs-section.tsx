@@ -1,25 +1,70 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { Headphones, Heart, Pencil, Plus, Trash2 } from 'lucide-react'
-import { Badge } from '@/components/ui/adminUi/badge'
-import { Button } from '@/components/ui/adminUi/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/adminUi/table'
-import { formatNumber, type SongStatus } from '@/lib/mock-data'
-import { SectionHeader } from './section-header'
-import { useSongs } from '@/hooks/songs/useSong'
-import { Song } from '@/types'
+import Image from "next/image";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  AlertTriangle,
+  Headphones,
+  Heart,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { Badge } from "@/components/ui/adminUi/badge";
+import { Button } from "@/components/ui/adminUi/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/adminUi/table";
+import { formatNumber, type SongStatus } from "@/lib/mock-data";
+import { SectionHeader } from "./section-header";
+import { useSongs } from "@/hooks/songs/useSong";
+import { useDeleteSong } from "@/hooks/songs/useDeleteSong";
+import { Song } from "@/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/adminUi/dialog";
 
 const statusStyles: Record<SongStatus, string> = {
-  published: 'border-accent/30 bg-accent/10 text-accent',
-  draft: 'border-primary/30 bg-primary/15 text-primary-foreground',
-  archived: 'border-border bg-secondary/60 text-muted-foreground',
-}
+  published: "border-accent/30 bg-accent/10 text-accent",
+  draft: "border-primary/30 bg-primary/15 text-primary-foreground",
+  archived: "border-border bg-secondary/60 text-muted-foreground",
+};
 
-export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
-  const {data} = useSongs();
-  const songs :Song[] = data?.data.content ?? [];
+export function SongsSection({
+  onAddSong,
+  onEditSong,
+}: {
+  onAddSong: () => void;
+  onEditSong: (song: Song) => void;
+}) {
+  const { data } = useSongs();
+  const { mutate: deleteSong, isPending: isDeleting } = useDeleteSong();
+  const [songToDelete, setSongToDelete] = useState<Song | null>(null);
+  const songs: Song[] = data?.data.content ?? [];
+
+  function handleDelete(song: Song) {
+    setSongToDelete(song);
+  }
+
+  function confirmDelete() {
+    if (!songToDelete) return;
+
+    deleteSong(Number(songToDelete.id), {
+      onSuccess: () => setSongToDelete(null),
+    });
+  }
+
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -27,7 +72,10 @@ export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
         title="Songs Management"
         description="Every theme in the archive. Edit metadata, manage covers, and control what the community hears."
         action={
-          <Button onClick={onAddSong} className="glow-primary rounded-full bg-primary px-5 text-primary-foreground hover:bg-primary/90">
+          <Button
+            onClick={onAddSong}
+            className="glow-primary rounded-full bg-primary px-5 text-primary-foreground hover:bg-primary/90"
+          >
             <Plus className="size-4" />
             Add Song
           </Button>
@@ -37,18 +85,28 @@ export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: 'easeOut' }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
         className="glass overflow-hidden rounded-2xl"
       >
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="pl-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Song</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Category</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Plays</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Likes</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
+                <TableHead className="pl-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Song
+                </TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Category
+                </TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Plays
+                </TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Likes
+                </TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Status
+                </TableHead>
                 <TableHead className="pr-5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Actions
                 </TableHead>
@@ -56,11 +114,14 @@ export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
             </TableHeader>
             <TableBody>
               {songs.map((song) => (
-                <TableRow key={song.id} className="border-border transition-colors hover:bg-secondary/40">
+                <TableRow
+                  key={song.id}
+                  className="border-border transition-colors hover:bg-secondary/40"
+                >
                   <TableCell className="py-3 pl-5">
                     <div className="flex items-center gap-3">
                       <Image
-                        src={song.cover || '/placeholder.svg'}
+                        src={song.cover || "/placeholder.svg"}
                         alt={`${song.title} cover art`}
                         width={44}
                         height={44}
@@ -68,11 +129,15 @@ export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
                       />
                       <div className="min-w-0">
                         <p className="truncate font-medium">{song.title}</p>
-                        <p className="truncate text-sm text-muted-foreground">{song.cartoon}</p>
+                        <p className="truncate text-sm text-muted-foreground">
+                          {song.cartoon}
+                        </p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{song.category}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {song.category}
+                  </TableCell>
                   <TableCell>
                     <span className="flex items-center gap-1.5 text-sm">
                       <Headphones className="size-3.5 text-muted-foreground" />
@@ -86,7 +151,10 @@ export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={`rounded-full px-2.5 capitalize ${statusStyles[song.status]}`}>
+                    <Badge
+                      variant="outline"
+                      className={`rounded-full px-2.5 capitalize ${statusStyles[song.status]}`}
+                    >
                       {song.status}
                     </Badge>
                   </TableCell>
@@ -97,6 +165,7 @@ export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
                         size="icon"
                         className="size-8 rounded-lg text-muted-foreground hover:bg-primary/15 hover:text-foreground"
                         aria-label={`Edit ${song.title}`}
+                        onClick={() => onEditSong(song)}
                       >
                         <Pencil className="size-4" />
                       </Button>
@@ -105,6 +174,8 @@ export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
                         size="icon"
                         className="size-8 rounded-lg text-muted-foreground hover:bg-destructive/15 hover:text-destructive"
                         aria-label={`Delete ${song.title}`}
+                        onClick={() => handleDelete(song)}
+                        disabled={isDeleting}
                       >
                         <Trash2 className="size-4" />
                       </Button>
@@ -116,6 +187,50 @@ export function SongsSection({ onAddSong }: { onAddSong: () => void }) {
           </Table>
         </div>
       </motion.div>
+
+      <Dialog
+        open={songToDelete !== null}
+        onOpenChange={(open) => !open && !isDeleting && setSongToDelete(null)}
+      >
+        <DialogContent className="glass rounded-2xl border-glass-border p-0 sm:max-w-md">
+          <DialogHeader className="p-6 pb-2">
+            <div className="mb-2 flex size-11 items-center justify-center rounded-full bg-destructive/15 text-destructive">
+              <AlertTriangle className="size-5" />
+            </div>
+            <DialogTitle className="font-heading text-xl font-bold">
+              Delete this memory?
+            </DialogTitle>
+            <DialogDescription className="leading-relaxed text-muted-foreground">
+              You are about to permanently delete{" "}
+              <span className="font-semibold text-foreground">
+                {songToDelete?.title}
+              </span>
+              . This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="border-glass-border bg-secondary/30 p-4 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setSongToDelete(null)}
+              disabled={isDeleting}
+              className="rounded-full border border-glass-border"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+              className="rounded-full"
+            >
+              <Trash2 className="size-4" />
+              {isDeleting ? "Deleting..." : "Delete Song"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }

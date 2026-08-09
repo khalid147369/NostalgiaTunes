@@ -23,8 +23,8 @@ export const SongService = {
     return api.get("/songs/getAll?sort=numEscuchas,desc&size=7");
   },
 
-  filterSongs(column:SongFilters=SongFilters.title,direction:string='desc',size:number=10) {
-    return api.get(`/songs/getAll?sort=${column},${direction}&size=${size}`);
+  filterSongs(column:SongFilters=SongFilters.title,direction:string='desc',size:number=10,FilterValue:string="") {
+    return api.get(`/songs/getAll?${column}=${FilterValue}&size=${size}`);
   },
   getById(id:number){
     return api.get(`/songs/getSingle/${id}`);
