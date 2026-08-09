@@ -9,14 +9,15 @@ import { useSendComment } from "@/hooks/comments/useSendComment";
 import { timeAgo } from "@/lib/utils";
 import { useUser } from "@/hooks/auth/useUser";
 import { useRouter } from "next/navigation";
+import { Avatar } from "../ui/adminUi/avatar";
 
 export function CommentsSection({ song }: { song: Song }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [draft, setDraft] = useState("");
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
 
-  const {user} = useUser();
-  const router = useRouter()
+  const { user } = useUser();
+  const router = useRouter();
   const { mutateAsync: getCommentsAsync } = useGetComments();
   const { mutateAsync: sendCommentsAsync } = useSendComment();
   useEffect(() => {
@@ -31,7 +32,7 @@ export function CommentsSection({ song }: { song: Song }) {
   }, []);
 
   const submit = async () => {
-      if (!user) {
+    if (!user) {
       router.push("/register");
       return;
     }
@@ -42,13 +43,13 @@ export function CommentsSection({ song }: { song: Song }) {
       text: { text },
     };
     const { data } = await sendCommentsAsync(comment);
-    const newComment :Comment=data;
+    const newComment: Comment = data;
     console.log("Comment sended: ", data);
     setComments((prev) => [
       {
         id: Number(newComment.id),
         creator: newComment.creator,
-        initials: newComment.creator.substring(0,2),
+        initials: newComment.creator.substring(0, 2),
         date: "Just now",
         text,
         likes: 0,
@@ -146,7 +147,11 @@ export function CommentsSection({ song }: { song: Song }) {
                     aria-hidden="true"
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/25 text-sm font-bold text-primary"
                   >
-                    {comment.avatar ?? comment.creator.substring(0,2)}
+                    {comment.avatar ? (
+                      <img src={String(comment.avatar)} />
+                    ) : (
+                      comment.creator.substring(0, 2)
+                    )}
                   </span>
                   <div className="flex min-w-0 flex-col gap-2">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
