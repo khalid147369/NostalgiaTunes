@@ -49,7 +49,8 @@ export function CommentsSection({ song }: { song: Song }) {
       {
         id: Number(newComment.id),
         creator: newComment.creator,
-        initials: newComment.creator.substring(0, 2),
+        avatar: newComment.avatar,
+        initials:"new",
         date: "Just now",
         text,
         likes: 0,
@@ -157,7 +158,7 @@ export function CommentsSection({ song }: { song: Song }) {
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <span className="font-semibold">@{comment.creator}</span>
                       <span className="text-xs text-muted-foreground">
-                        {timeAgo(comment.date)}
+                        {comment.initials?comment.date: timeAgo(comment.date)}
                       </span>
                     </div>
                     <p className="text-sm leading-relaxed text-muted-foreground">

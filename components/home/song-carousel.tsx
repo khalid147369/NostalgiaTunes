@@ -7,6 +7,7 @@ import { SectionHeading } from "@/components/home/section-heading";
 import { SongCard } from "@/components/song/song-card";
 import { useTrending } from "@/hooks/songs/useTrendingSongs";
 import { SongCardSkeleton } from "@/components/loadingScreen/SkeletonCard";
+import { PageBar } from "@/components/ui/page-bar";
 interface SongCarouselProps {
   id?: string;
   eyebrow?: string;
@@ -31,22 +32,40 @@ export function SongCarousel({
       behavior: "smooth",
     });
   };
-   const [data, setdata] = useState<Song[]>([]);
-  
+  const [data, setdata] = useState<Song[]>([]);
+  const [isShowedAll, setIsShowedAll] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
+  const { mutateAsync, isPending } = useTrending();
+  const getTrending = async (nextPage = 0, showAll = isShowedAll) => {
+    const size = showAll ? 12 : 6;
+    const { data: response } = await mutateAsync({
+      size,
+      page: nextPage,
+    });
+    const songs = response?.content || [];
+    const responseTotalPages = response?.totalPages;
+    const totalElements = response?.totalElements;
 
-  const { mutateAsync,isPending } = useTrending();
-  useEffect(()=>{
-    const getTrending= async()=>{
-     const {data:response} =await mutateAsync(undefined);
-     console.log("data",response.content);
-      const songs: Song[] = response?.content || [];
-      
-      setdata(songs)
-    }
-    getTrending()
-  },[])
- 
+    setdata(songs);
+    setPage(response?.number ?? nextPage);
+    setTotalPages(
+      responseTotalPages ??
+        (totalElements != null ? Math.ceil(totalElements / size) : 0),
+    );
+  };
+
+  useEffect(() => {
+    getTrending();
+  }, []);
+
+  const handleShowAll = () => {
+    const nextShowAll = !isShowedAll;
+    setIsShowedAll(!isShowedAll);
+    getTrending(0, nextShowAll);
+    console.log(nextShowAll);
+  };
 
   return (
     <section
@@ -59,6 +78,8 @@ export function SongCarousel({
             eyebrow={eyebrow}
             title={title}
             description={description}
+            handleShowAll={handleShowAll}
+            isShowedAll={isShowedAll}
           />
         </div>
         <div className="mb-6 hidden shrink-0 items-center gap-2 sm:flex">
@@ -97,6 +118,14 @@ export function SongCarousel({
               />
             ))}
       </div>
+      {isShowedAll && (
+        <PageBar
+          page={page}
+          totalPages={totalPages}
+          onPageChange={getTrending}
+          disabled={isPending}
+        />
+      )}
     </section>
   );
 }

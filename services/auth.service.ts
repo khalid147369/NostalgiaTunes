@@ -6,7 +6,7 @@ export const AuthService = {
     return api.post("/auth/login", user);
   },
 
-  register(user: AuthDTO) {
+  register(user: AuthDTO | FormData) {
     return api.post("/users/auth/register", user);
   },
 

@@ -74,7 +74,7 @@ export function Navbar() {
             <Search className="size-4" />
           </button>
           {user ? (
-            <AvatarMenu />
+            <AvatarMenu user={user} logout={logout} />
           ) : (
             <Link
               href="/login"

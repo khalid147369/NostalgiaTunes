@@ -9,16 +9,44 @@ import { formatCount, formatDuration } from "@/lib/format";
 import { SectionHeading } from "@/components/home/section-heading";
 import { cn } from "@/lib/utils";
 import { useMostListended } from "@/hooks/songs/useMostListenedSongs";
+import { useMostListendedPages } from "@/hooks/songs/useMostListenedSongs";
 import { Song } from "@/types";
 import { MostListenedSkeleton } from "../loadingScreen/MostListened";
 import Link from "next/link";
+import { PageBar } from "@/components/ui/page-bar";
+import { useEffect, useState } from "react";
 
 export function MostListened() {
   const { play, currentSong, isPlaying, likedIds, toggleLike } = usePlayer();
-  const { data, isLoading } = useMostListended();
+  const { data: initialData, isLoading: isInitialLoading } = useMostListended();
+  const { mutateAsync, isPending } = useMostListendedPages();
+  const [mostListenedSongs, setMostListenedSongs] = useState<Song[]>([]);
+  const [isShowedAll, setIsShowedAll] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const mostListenedSongs: Song[] = data?.data.content ?? [];
-  if (isLoading) {
+  useEffect(() => {
+    setMostListenedSongs(initialData?.data.content ?? []);
+    setTotalPages(initialData?.data.totalPages ?? 0);
+  }, [initialData]);
+
+  const getMostListened = async (nextPage = 0, showAll = isShowedAll) => {
+    const { data } = await mutateAsync({
+      size: showAll ? 12 : 7,
+      page: nextPage,
+    });
+    setMostListenedSongs(data?.content ?? []);
+    setPage(data?.number ?? nextPage);
+    setTotalPages(data?.totalPages ?? 0);
+  };
+
+  const handleShowAll = () => {
+    const nextShowAll = !isShowedAll;
+    setIsShowedAll(nextShowAll);
+    getMostListened(0, nextShowAll);
+  };
+
+  if (isInitialLoading) {
     return <MostListenedSkeleton />;
   }
 
@@ -28,6 +56,8 @@ export function MostListened() {
         eyebrow="Hall of fame"
         title="Most listened of all time"
         description="The themes the community keeps coming back to, ranked by pure nostalgia."
+        handleShowAll={handleShowAll}
+        isShowedAll={isShowedAll}
       />
 
       <div className="overflow-hidden rounded-2xl border border-border glass">
@@ -69,7 +99,7 @@ export function MostListened() {
                   sizes="48px"
                   className="object-cover"
                 />
-                <span className="absolute inset-0 flex items-center justify-center bg-background/50 opacity-0 transition-opacity group-hover:opacity-100 aria-hidden:opacity-100">
+                <span className="absolute inset-0 flex items-center justify-center bg-background/50 opacity-0 transition-opacity group-hover:opacity-100">
                   {isThisPlaying ? (
                     <Pause className="size-4 fill-current" />
                   ) : (
@@ -113,6 +143,14 @@ export function MostListened() {
           );
         })}
       </div>
+      {isShowedAll && (
+        <PageBar
+          page={page}
+          totalPages={totalPages}
+          onPageChange={getMostListened}
+          disabled={isPending}
+        />
+      )}
     </section>
   );
 }

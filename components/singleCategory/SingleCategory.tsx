@@ -21,18 +21,17 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
   const [songs, setSongs] = useState<Song[]>([]);
   const [category, setCategory] = useState<CategoryDTO>();
   const [mostListenedSong, setMostListenedSong] = useState<Song[]>([]);
-   const [SongsByCategory, setSongsByCategory] = useState<Song[]>([]);
+  const [SongsByCategory, setSongsByCategory] = useState<Song[]>([]);
   const { mutateAsync, isPending } = useTrending();
 
   const { mutateAsync: getCategoryAsync } = useGetCategoryById();
   const { mutateAsync: getMostListenedByCategoryAsync } =
     usegetMostListenedByCategory();
-    const { mutateAsync: getSongsByCategoryAsync } =
-    usegetSongsByCategory();
+  const { mutateAsync: getSongsByCategoryAsync } = usegetSongsByCategory();
 
   useEffect(() => {
     const getTrending = async () => {
-      const { data: response } = await mutateAsync(Number(id));
+      const { data: response } = await mutateAsync({ category: Number(id) });
       console.log("data", response.content);
 
       setSongs(response?.content || []);
@@ -56,7 +55,7 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
     };
     getMostListened();
 
-        const getSongsByCategory = async () => {
+    const getSongsByCategory = async () => {
       const { data } = await getSongsByCategoryAsync({
         size: 10,
         category: Number(id),
@@ -71,9 +70,8 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
     <div className=" flex flex-col justify-between gap-8">
       <Navbar />
       <div className="-mx-5 -mt-5">
-       {category && <Categoryhero category={category} />} 
+        {category && <Categoryhero category={category} />}
       </div>
-      
 
       <SongCarousel
         eyebrow="Trending right now"
@@ -87,9 +85,7 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
         songs={mostListenedSong}
       />
 
-            <SongCarousel
-
-
+      <SongCarousel
         eyebrow="Related songs"
         title="From the same universe"
         songs={SongsByCategory}

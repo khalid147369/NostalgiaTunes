@@ -11,14 +11,17 @@ import { AuthDTO } from "@/types";
 import { useUser } from "@/hooks/auth/useUser";
 import { setAccessToken } from "@/services/authToken";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {},
-  );
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    text?: string;
+  }>({});
   const [status, setStatus] = useState<string | null>(null);
 
   const { login, user: userData } = useUser();
@@ -43,21 +46,36 @@ export function LoginForm() {
     setStatus(null);
     if (!validate()) return;
     // TODO: wire this up to a real auth backend (e.g. Better Auth + Neon)
-    setStatus(
-      "Looks good! Connect a database integration to enable real sign in.",
-    );
+   
     const user: AuthDTO = {
       email: email,
       password: password,
     };
-    const data = await loginMutation.mutateAsync(user);
-    if (data.status === 200) {
+
+    try {
+      const data = await loginMutation.mutateAsync(user);
+
       setAccessToken(data.data.token);
       await login();
-      console.log(userData);
+       setStatus(
+      "Connected successfully",
+    );
       router.push("/");
-    } else {
-      setErrors(data.data);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        switch (error.response?.status) {
+          case 400:
+            setErrors({ text: "invalid credencials" });
+            break;
+          case 500:
+            setErrors({ text: "internal server error" });
+            break;
+
+          default:
+            setErrors({ text: `error while registering: ${error}` });
+            break;
+        }
+      }
     }
   }
 
@@ -122,6 +140,14 @@ export function LoginForm() {
           className="rounded-lg border border-accent/40 bg-accent/10 px-4 py-3 text-sm text-accent"
         >
           {status}
+        </p>
+      )}
+             {errors?.text && (
+        <p
+          role="status"
+          className="rounded-lg border border-red-500 bg-accent/10 px-4 py-3 text-sm text-destructive"
+        >
+          {errors?.text}
         </p>
       )}
 

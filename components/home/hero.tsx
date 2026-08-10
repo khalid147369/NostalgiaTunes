@@ -43,7 +43,7 @@ export function Hero() {
 
   const { data } = useCounts();
   const { play } = usePlayer();
-  const { mutateAsync:getTrendingAsync} = useTrending();
+  const { mutateAsync: getTrendingAsync } = useTrending();
   const { mutateAsync } = usesearch();
 
   const stats = [
@@ -75,17 +75,14 @@ export function Hero() {
     return () => clearTimeout(timer);
   }, [value, selectedCategory]);
 
-
-  useEffect(()=>{
-
-    const getTrending = async ()=>{
-      const {data} = await getTrendingAsync(undefined);
+  useEffect(() => {
+    const getTrending = async () => {
+      const { data } = await getTrendingAsync({});
       console.log(data.content);
-      setFeaturedSongs(data.content)
-    }
-getTrending();
-
-  },[])
+      setFeaturedSongs(data.content);
+    };
+    getTrending();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -94,14 +91,14 @@ getTrending();
   return (
     <section className="relative min-h-[92vh] overflow-visible">
       {/* Background image */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-hidden">
         <Image
           src="/covers/hero.png"
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-60"
+          className="scale-125 object-cover object-center opacity-60"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background" />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
@@ -166,7 +163,12 @@ getTrending();
           </motion.div>
 
           <motion.div variants={item} className="mt-10">
-            <SearchBar handleChange={handleChange} value={value} trending={featuredSongs} placeholder="Search a cartoon, anime or song you loved..." />
+            <SearchBar
+              handleChange={handleChange}
+              value={value}
+              trending={featuredSongs}
+              placeholder="Search a cartoon, anime or song you loved..."
+            />
             <SearchResults
               open={value.length > 0}
               songs={songs}

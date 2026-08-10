@@ -51,7 +51,7 @@ const SingleSong = ({ songId }: SongId) => {
   };
 
   const getTrendingSongs = async () => {
-    const { data } = await trending(undefined);
+    const { data } = await trending({});
 
     console.log(data.content);
     setTrendingSongs(data.content);

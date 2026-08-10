@@ -16,28 +16,31 @@ import { useUnsave } from "@/hooks/savedSongs/useUnsave";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-
 export function FeaturedSong() {
-   const [featuredSong, setFeaturedSong] = useState<Song>({});
-  const { play, currentSong, isPlaying, likedIds, toggleLike, SavedSongIds ,toggleSavedSong } =
-    usePlayer();
-  const {mutate:save} = useSave();
-  const {mutate:unsave} = useUnsave();
-  const { mutateAsync ,isPending} = useTrending();
+  const [featuredSong, setFeaturedSong] = useState<Song>({});
+  const {
+    play,
+    currentSong,
+    isPlaying,
+    likedIds,
+    toggleLike,
+    SavedSongIds,
+    toggleSavedSong,
+  } = usePlayer();
+  const { mutate: save } = useSave();
+  const { mutate: unsave } = useUnsave();
+  const { mutateAsync, isPending } = useTrending();
 
-
-  useEffect(()=>{
-    const getTrending= async()=>{
-     const {data:response} =await mutateAsync(undefined);
-     console.log("data",response.content);
+  useEffect(() => {
+    const getTrending = async () => {
+      const { data: response } = await mutateAsync({});
+      console.log("data", response.content);
       const songs: Song = response?.content[0] || {};
-      
 
-      setFeaturedSong(songs)
-    }
-    getTrending()
-  },[])
-
+      setFeaturedSong(songs);
+    };
+    getTrending();
+  }, []);
 
   const isActive = currentSong?.id === featuredSong.id;
   const isThisPlaying = isActive && isPlaying;
@@ -48,15 +51,14 @@ export function FeaturedSong() {
     return <FeaturedSongSkeleton />;
   }
 
-  const handleSave = ()=>{
-
+  const handleSave = () => {
     if (saved) {
       unsave(Number(featuredSong.id));
-    }else{
+    } else {
       save(Number(featuredSong.id));
     }
-        toggleSavedSong(featuredSong.id)
-  }
+    toggleSavedSong(featuredSong.id);
+  };
 
   return (
     <section className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6">
@@ -71,19 +73,18 @@ export function FeaturedSong() {
           <div className="grid gap-0 lg:grid-cols-[minmax(0,0.9fr)_1fr]">
             {/* Artwork */}
             <div className="relative aspect-square w-full overflow-hidden lg:aspect-auto">
-               <Link href={`/song/${featuredSong.id}`}>
-               <Image
-                src={featuredSong.cover || "/placeholder.svg"}
-                alt={`${featuredSong.title} — ${featuredSong.cartoon}`}
-                fill
-                sizes="(max-width: 1024px) 100vw, 45vw"
-                className="object-cover"
-              />
-              
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent lg:bg-gradient-to-r" />
-               </Link>
-              
-              
+              <Link href={`/song/${featuredSong.id}`}>
+                <Image
+                  src={featuredSong.cover || "/placeholder.svg"}
+                  alt={`${featuredSong.title} — ${featuredSong.cartoon}`}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                  className="object-cover"
+                />
+
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent lg:bg-gradient-to-r" />
+              </Link>
+
               <motion.button
                 type="button"
                 onClick={() => play(featuredSong)}
@@ -168,7 +169,7 @@ export function FeaturedSong() {
                   Like
                 </button>
                 <button
-                onClick={handleSave}
+                  onClick={handleSave}
                   type="button"
                   aria-label="Save"
                   className="flex size-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-cyan/50 hover:text-foreground"

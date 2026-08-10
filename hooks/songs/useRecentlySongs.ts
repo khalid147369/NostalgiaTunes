@@ -4,6 +4,7 @@ import { SongService } from "@/services/song.service";
 export function useRecently() {
   return useMutation({
 
-    mutationFn: (size: number | undefined) => SongService.getRecentlyAdded(size),
+    mutationFn: ({ size, page = 0 }: { size?: number; page?: number } = {}) =>
+      SongService.getRecentlyAdded(size, page),
   });
 }

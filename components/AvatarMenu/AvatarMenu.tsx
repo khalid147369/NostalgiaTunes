@@ -14,16 +14,19 @@ import { Avatar, AvatarFallback } from "@/components/ui/adminUi/avatar";
 import { useUser } from "@/hooks/auth/useUser";
 import Link from "next/link";
 import { LoadingScreen } from "../loadingScreen/LoadingScreen";
+import { UserDTO } from "@/types";
 
-export default function AvatarMenu() {
-  const { user, logout, loading } = useUser();
-
+export default function AvatarMenu({ user,logout }: { user: UserDTO,logout:()=>void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2.5 rounded-full border border-glass-border py-1 pl-1 pr-1 transition-colors hover:bg-secondary/60 sm:pr-3">
         <Avatar className="size-8">
-          <AvatarFallback className="bg-primary text-xs font-bold text-primary-foreground">
-            {user?.nombre.substring(0, 2)}
+          <AvatarFallback className="bg-primary text-xs font-bold text-primary-foreground overflow-hidden ">
+            {user?.fotoPerfil ? (
+              <img className=" w-full " src={String(user?.fotoPerfil)} />
+            ) : (
+              user?.nombre.substring(0, 2)
+            )}
           </AvatarFallback>
         </Avatar>
 

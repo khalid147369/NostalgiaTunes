@@ -1,67 +1,99 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { Eye, EyeOff, UserPlus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { AuthDTO } from '@/types'
-import { useRegister } from '@/hooks/auth/useRegister'
+import { useState } from "react";
+import Link from "next/link";
+import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useRegister } from "@/hooks/auth/useRegister";
+import { AvatarUpload } from "../ui/avatarInput";
+import axios from "axios";
 
 type Errors = {
-  username?: string
-  email?: string
-  password?: string
-}
+  username?: string;
+  email?: string;
+  password?: string;
+  text?:string;
+};
 
 export function RegisterForm() {
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState<Errors>({})
-  const [status, setStatus] = useState<string | null>(null)
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<Errors>({});
+  const [status, setStatus] = useState<string | null>(null);
   const registerMutation = useRegister();
 
   function validate() {
-    const next: Errors = {}
+    const next: Errors = {};
     if (username.trim().length < 3) {
-      next.username = 'Username must be at least 3 characters.'
+      next.username = "Username must be at least 3 characters.";
     } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      next.username = 'Only letters, numbers, and underscores are allowed.'
+      next.username = "Only letters, numbers, and underscores are allowed.";
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      next.email = 'Enter a valid email address.'
+      next.email = "Enter a valid email address.";
     }
     if (password.length < 8) {
-      next.password = 'Password must be at least 8 characters.'
+      next.password = "Password must be at least 8 characters.";
     }
-    setErrors(next)
-    return Object.keys(next).length === 0
+    setErrors(next);
+    return Object.keys(next).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setStatus(null)
-    if (!validate()) return
-    // TODO: wire this up to a real auth backend (e.g. Better Auth + Neon)
-    setStatus(
-      'Looks good! Connect a database integration to enable real registration.',
-    )
-        const user:AuthDTO ={
-          email:email,
-          password:password,
-          nombre:username
+    e.preventDefault();
+    setStatus(null);
+    if (!validate()) return;
+    const userForm = new FormData();
+    userForm.append("email", email);
+    userForm.append("password", password);
+    userForm.append("nombre", username);
+    if (profileImage) {
+      userForm.append("fotoPerfil", profileImage);
+    }
+
+    try {
+      const { data } = await registerMutation.mutateAsync(userForm);
+      console.log("login: ", data);
+
+      setEmail("");
+      setUsername("");
+      setPassword("");
+      setProfileImage(null);
+      setStatus("Account created successfully.");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        switch (error.response?.status) {
+          case 400:
+            setErrors({text:"invalid credencials"})
+            break;
+          case 409:
+            setErrors({text:"user already exist try to sign in"})
+            break;
+          case 500:
+            setErrors({text:"internal server error"})
+            break;
+        
+          default:
+             setErrors({text:`error while registering: ${error}`})
+            break;
         }
-        const data = await registerMutation.mutateAsync(user) 
-        setEmail("")
-        setUsername("")
-        setPassword("")
+       
+      }
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="profile-image">Profile image (optional)</Label>
+        <AvatarUpload inputId="profile-image" onChange={setProfileImage} />
+      </div>
+
       <div className="flex flex-col gap-2">
         <Label htmlFor="username">Username</Label>
         <Input
@@ -101,7 +133,7 @@ export function RegisterForm() {
         <div className="relative">
           <Input
             id="password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             placeholder="At least 8 characters"
             value={password}
@@ -113,7 +145,7 @@ export function RegisterForm() {
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground hover:text-foreground"
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
               <EyeOff className="size-4" aria-hidden="true" />
@@ -135,6 +167,14 @@ export function RegisterForm() {
           {status}
         </p>
       )}
+       {errors?.text && (
+        <p
+          role="status"
+          className="rounded-lg border border-red-500 bg-accent/10 px-4 py-3 text-sm text-destructive"
+        >
+          {errors?.text}
+        </p>
+      )}
 
       <Button
         type="submit"
@@ -146,11 +186,15 @@ export function RegisterForm() {
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{' '}
-        <Link style={{ color: 'oklch(0.85 0.13 200)' }}  href="/login" className="font-medium  hover:underline">
+        Already have an account?{" "}
+        <Link
+          style={{ color: "oklch(0.85 0.13 200)" }}
+          href="/login"
+          className="font-medium  hover:underline"
+        >
           Sign in
         </Link>
       </p>
     </form>
-  )
+  );
 }
