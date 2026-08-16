@@ -34,7 +34,6 @@ export function FeaturedSong() {
   useEffect(() => {
     const getTrending = async () => {
       const { data: response } = await mutateAsync({});
-      console.log("data", response.content);
       const songs: Song = response?.content[0] || {};
 
       setFeaturedSong(songs);

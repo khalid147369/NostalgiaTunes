@@ -14,7 +14,7 @@ type Errors = {
   username?: string;
   email?: string;
   password?: string;
-  text?:string;
+  text?: string;
 };
 
 export function RegisterForm() {
@@ -58,7 +58,6 @@ export function RegisterForm() {
 
     try {
       const { data } = await registerMutation.mutateAsync(userForm);
-      console.log("login: ", data);
 
       setEmail("");
       setUsername("");
@@ -69,20 +68,19 @@ export function RegisterForm() {
       if (axios.isAxiosError(error)) {
         switch (error.response?.status) {
           case 400:
-            setErrors({text:"invalid credencials"})
+            setErrors({ text: "invalid credencials" });
             break;
           case 409:
-            setErrors({text:"user already exist try to sign in"})
+            setErrors({ text: "user already exist try to sign in" });
             break;
           case 500:
-            setErrors({text:"internal server error"})
+            setErrors({ text: "internal server error" });
             break;
-        
+
           default:
-             setErrors({text:`error while registering: ${error}`})
+            setErrors({ text: `error while registering: ${error}` });
             break;
         }
-       
       }
     }
   }
@@ -167,7 +165,7 @@ export function RegisterForm() {
           {status}
         </p>
       )}
-       {errors?.text && (
+      {errors?.text && (
         <p
           role="status"
           className="rounded-lg border border-red-500 bg-accent/10 px-4 py-3 text-sm text-destructive"

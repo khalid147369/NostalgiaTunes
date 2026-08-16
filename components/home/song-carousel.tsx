@@ -33,12 +33,11 @@ export function SongCarousel({
     });
   };
   const [data, setdata] = useState<Song[]>([]);
-  const [isShowedAll, setIsShowedAll] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
   const { mutateAsync, isPending } = useTrending();
-  const getTrending = async (nextPage = 0, showAll = isShowedAll) => {
+  const getTrending = async (nextPage = 0, showAll = false) => {
     const size = showAll ? 12 : 6;
     const { data: response } = await mutateAsync({
       size,
@@ -50,22 +49,17 @@ export function SongCarousel({
 
     setdata(songs);
     setPage(response?.number ?? nextPage);
-    setTotalPages(
+    const computedTotalPages =
       responseTotalPages ??
-        (totalElements != null ? Math.ceil(totalElements / size) : 0),
-    );
+      (totalElements != null ? Math.ceil(totalElements / size) : 0);
+    setTotalPages(computedTotalPages);
   };
 
   useEffect(() => {
     getTrending();
   }, []);
 
-  const handleShowAll = () => {
-    const nextShowAll = !isShowedAll;
-    setIsShowedAll(!isShowedAll);
-    getTrending(0, nextShowAll);
-    console.log(nextShowAll);
-  };
+  // showAll was removed — PageBar will show when totalPages > 1
 
   return (
     <section
@@ -78,8 +72,6 @@ export function SongCarousel({
             eyebrow={eyebrow}
             title={title}
             description={description}
-            handleShowAll={handleShowAll}
-            isShowedAll={isShowedAll}
           />
         </div>
         <div className="mb-6 hidden shrink-0 items-center gap-2 sm:flex">
@@ -114,11 +106,11 @@ export function SongCarousel({
               <SongCard
                 key={song.id}
                 song={song}
-                className="w-44 shrink-0 snap-start sm:w-52"
+                className="w-36 shrink-0 snap-start sm:w-44 md:w-48 lg:w-52"
               />
             ))}
       </div>
-      {isShowedAll && (
+      {totalPages > 1 && (
         <PageBar
           page={page}
           totalPages={totalPages}

@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   //devolver user después de cada refresco de página
   useEffect(() => {
-    setLoading(true)
+    setLoading(true);
     loadUser();
   }, []);
 
@@ -31,7 +31,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(currentUser);
     } catch (e) {
-      console.log("me ERROR", e);
     } finally {
       setLoading(false);
     }
@@ -45,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   function logout() {
     setUser(null);
-    setAccessToken(null)
+    setAccessToken(null);
     AuthService.logout();
   }
 

@@ -33,10 +33,7 @@ const Profile = () => {
   const songs: Song[] = data?.data.content || [];
   const lastsong: Song = lastLikedSong?.data || [];
   const favoriteSongs: Song[] = savedSongs?.data ?? [];
-  const { user,loadUser } = useUser();
-
-  console.log("Last played", songs);
-  console.log("Saved Songs", songs);
+  const { user, loadUser } = useUser();
 
   return (
     <div className="relative min-h-svh overflow-hidden bg-background">

@@ -32,7 +32,7 @@ export default function SearchResults({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.98 }}
           transition={{ duration: 0.2 }}
-          className="relative left-0 right-0 top-full z-50 mt-3 overflow-hidden rounded-3xl border border-violet-500/20 bg-[#0f172a]/95 backdrop-blur-xl shadow-[0_0_50px_rgba(139,92,246,.2)] "
+          className="relative left-0 right-0 -top-20 z-50 mt-3 overflow-hidden rounded-3xl border border-violet-500/20 bg-[#0f172a]/95 backdrop-blur-xl shadow-[0_0_50px_rgba(139,92,246,.2)] "
         >
           {/* Categorías */}
           <div className="border-b border-white/5 p-4">

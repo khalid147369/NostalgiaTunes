@@ -1,27 +1,27 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { ArrowDown, ArrowRight } from 'lucide-react'
-import { Reveal } from '@/components/motion/reveal'
+import Link from "next/link";
+import { ArrowDown, ArrowRight } from "lucide-react";
+import { Reveal } from "@/components/motion/reveal";
 
 interface SectionHeadingProps {
-  eyebrow?: string
-  title: string
-  description?: string
-  actionLabel?: string
-  actionHref?: string
-  handleShowAll:()=>void,
-  isShowedAll:boolean
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  actionLabel?: string;
+  actionHref?: string;
+  handleShowAll?: () => void;
+  isShowedAll?: boolean;
 }
 
 export function SectionHeading({
   eyebrow,
   title,
   description,
-  actionLabel = 'See all',
-  actionHref = '#',
+  actionLabel = "See all",
+  actionHref = "#",
   handleShowAll,
-  isShowedAll
+  isShowedAll,
 }: SectionHeadingProps) {
   return (
     <Reveal className="mb-6 flex items-end justify-between gap-6">
@@ -40,23 +40,24 @@ export function SectionHeading({
           </p>
         ) : null}
       </div>
-      <div
-        onClick={handleShowAll}
-        className=" cursor-pointer group hidden shrink-0 items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground sm:inline-flex"
-      >
-        {isShowedAll ? (
-          <>
-            <span>Show Less</span>
-            <ArrowDown className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </>
-        ) : (
-          <>
-            <span>{actionLabel}</span>
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </>
-        )}
-
-      </div>
+      {handleShowAll ? (
+        <div
+          onClick={handleShowAll}
+          className=" cursor-pointer group hidden shrink-0 items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground sm:inline-flex"
+        >
+          {isShowedAll ? (
+            <>
+              <span>Show Less</span>
+              <ArrowDown className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </>
+          ) : (
+            <>
+              <span>{actionLabel}</span>
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </>
+          )}
+        </div>
+      ) : null}
     </Reveal>
-  )
+  );
 }

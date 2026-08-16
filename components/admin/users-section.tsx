@@ -35,8 +35,6 @@ export function UsersSection() {
   const { data } = useGetAllUsers();
 
   const users: UserDTO[] = data?.data ?? [];
-
-  console.log(users);
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -81,13 +79,19 @@ export function UsersSection() {
                   <TableCell className="py-3 pl-5">
                     <div className="flex items-center gap-3">
                       <Avatar className="size-9">
-                        {
-                          user.fotoPerfil?
-                          <img src={user.fotoPerfil ? String(user.fotoPerfil) : undefined}/>:<AvatarFallback className="bg-primary/20 text-xs font-bold text-foreground">
-                          {user?.nombre?.substring(0, 2)}
-                        </AvatarFallback>
-                        }
-                        
+                        {user.fotoPerfil ? (
+                          <img
+                            src={
+                              user.fotoPerfil
+                                ? String(user.fotoPerfil)
+                                : undefined
+                            }
+                          />
+                        ) : (
+                          <AvatarFallback className="bg-primary/20 text-xs font-bold text-foreground">
+                            {user?.nombre?.substring(0, 2)}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
                       <span className="font-medium">{user.nombre}</span>
                     </div>

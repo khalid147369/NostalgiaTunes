@@ -23,13 +23,12 @@ export function SongGridSection({
   description,
 }: SongGridSectionProps) {
   const [songs, setSongs] = useState<Song[]>([]);
-  const [isShowedAll, setIsShowedAll] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
   const { mutateAsync, isPending: isLoading } = useRecently();
 
-  const getrecentlySongs = async (nextPage = 0, showAll = isShowedAll) => {
+  const getrecentlySongs = async (nextPage = 0, showAll = false) => {
     const { data } = await mutateAsync({
       size: showAll ? 12 : 6,
       page: nextPage,
@@ -42,11 +41,6 @@ export function SongGridSection({
     getrecentlySongs();
   }, []);
 
-  const handleShowAll = () => {
-    const nextShowAll = !isShowedAll;
-    setIsShowedAll(nextShowAll);
-    getrecentlySongs(0, nextShowAll);
-  };
   return (
     <>
       {songs?.length > 0 ? (
@@ -58,8 +52,6 @@ export function SongGridSection({
             eyebrow={eyebrow}
             title={title}
             description={description}
-            handleShowAll={handleShowAll}
-            isShowedAll={isShowedAll}
           />
           <motion.div
             whileInView="show"
@@ -93,7 +85,7 @@ export function SongGridSection({
                     ),
                 )}
           </motion.div>
-          {isShowedAll && (
+          {totalPages > 1 && (
             <PageBar
               page={page}
               totalPages={totalPages}

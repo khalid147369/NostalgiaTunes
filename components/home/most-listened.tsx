@@ -21,7 +21,6 @@ export function MostListened() {
   const { data: initialData, isLoading: isInitialLoading } = useMostListended();
   const { mutateAsync, isPending } = useMostListendedPages();
   const [mostListenedSongs, setMostListenedSongs] = useState<Song[]>([]);
-  const [isShowedAll, setIsShowedAll] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -30,7 +29,7 @@ export function MostListened() {
     setTotalPages(initialData?.data.totalPages ?? 0);
   }, [initialData]);
 
-  const getMostListened = async (nextPage = 0, showAll = isShowedAll) => {
+  const getMostListened = async (nextPage = 0, showAll = false) => {
     const { data } = await mutateAsync({
       size: showAll ? 12 : 7,
       page: nextPage,
@@ -38,12 +37,6 @@ export function MostListened() {
     setMostListenedSongs(data?.content ?? []);
     setPage(data?.number ?? nextPage);
     setTotalPages(data?.totalPages ?? 0);
-  };
-
-  const handleShowAll = () => {
-    const nextShowAll = !isShowedAll;
-    setIsShowedAll(nextShowAll);
-    getMostListened(0, nextShowAll);
   };
 
   if (isInitialLoading) {
@@ -56,8 +49,6 @@ export function MostListened() {
         eyebrow="Hall of fame"
         title="Most listened of all time"
         description="The themes the community keeps coming back to, ranked by pure nostalgia."
-        handleShowAll={handleShowAll}
-        isShowedAll={isShowedAll}
       />
 
       <div className="overflow-hidden rounded-2xl border border-border glass">
@@ -143,7 +134,7 @@ export function MostListened() {
           );
         })}
       </div>
-      {isShowedAll && (
+      {totalPages > 1 && (
         <PageBar
           page={page}
           totalPages={totalPages}

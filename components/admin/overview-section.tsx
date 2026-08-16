@@ -15,26 +15,21 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export function OverviewSection() {
-
   const [recentlySong, setRecentlySong] = useState<Song[]>([]);
 
   const topSongs = [...songs].sort((a, b) => b.listens - a.listens).slice(0, 5);
 
-  const { mutateAsync:recentlyAdedSongs } = useRecently();
+  const { mutateAsync: recentlyAdedSongs } = useRecently();
   const { data: mostListenedSongs } = useMostListended();
 
-  
-
   const mostListened: Song[] = mostListenedSongs?.data.content || [];
-const getRecentlySongs = async ()=>{
-  const {data} = await recentlyAdedSongs(undefined);
-  setRecentlySong(data?.content??[])
-    }
-  useEffect(()=>{
-    
-getRecentlySongs()
-  },[])
-  console.log(recentlySong);
+  const getRecentlySongs = async () => {
+    const { data } = await recentlyAdedSongs(undefined);
+    setRecentlySong(data?.content ?? []);
+  };
+  useEffect(() => {
+    getRecentlySongs();
+  }, []);
   return (
     <div className="space-y-6">
       <SectionHeader

@@ -32,7 +32,6 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
   useEffect(() => {
     const getTrending = async () => {
       const { data: response } = await mutateAsync({ category: Number(id) });
-      console.log("data", response.content);
 
       setSongs(response?.content || []);
     };

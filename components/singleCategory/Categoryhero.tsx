@@ -31,13 +31,13 @@ const item = {
 
 export function Categoryhero({ category }: { category: CategoryDTO }) {
   const [value, setValue] = useState("");
-const [trending, setTrending] = useState<Song[]>([]);
+  const [trending, setTrending] = useState<Song[]>([]);
   const router = useRouter();
 
   const [songs, setsongs] = useState([]);
 
   const { play } = usePlayer();
-  const { mutateAsync:getTrendingAsync } = useTrending();
+  const { mutateAsync: getTrendingAsync } = useTrending();
   const { mutateAsync } = usesearch();
 
   const stats = [
@@ -72,17 +72,17 @@ const [trending, setTrending] = useState<Song[]>([]);
   }, [value]);
 
   useEffect(() => {
-        const getTrending = async ()=>{
-      const {data} = await getTrendingAsync(Number(category.id));
-      setTrending(data.content)
-    }
-getTrending();
+    const getTrending = async () => {
+      const { data } = await getTrendingAsync(Number(category.id));
+      setTrending(data.content);
+    };
+    getTrending();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
-  console.log(category);
+
   return (
     <section className="relative min-h-[92vh] overflow-visible">
       {/* Background image */}
@@ -183,7 +183,6 @@ getTrending();
                 <p className="text-xs text-muted-foreground">{s.label}</p>
               </div>
             ))}
-
           </motion.div>
         </motion.div>
       </div>

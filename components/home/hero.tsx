@@ -2,19 +2,19 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Play, Sparkles } from "lucide-react";
+import { Play } from "lucide-react";
 import { usePlayer } from "@/contexts/player-context";
-import { formatCount } from "@/lib/format";
 import { FloatingParticles } from "@/components/background/floating-particles";
 import { SearchBar } from "@/components/home/search-bar";
 import { useCounts } from "@/hooks/useCounts";
-import { Song, Stats } from "@/types";
+import { Song } from "@/types";
 import { useTrending } from "@/hooks/songs/useTrendingSongs";
 import { useEffect, useState } from "react";
 import { usesearch } from "@/hooks/useSearch";
 import { useRouter } from "next/navigation";
 import { useCategories } from "@/hooks/category/useCategory";
 import SearchResults from "../ui/songSearchPanel";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const container = {
   hidden: {},
@@ -41,7 +41,7 @@ export function Hero() {
   const { data: ctgs } = useCategories();
   const categories = ctgs?.data || [];
 
-  const { data } = useCounts();
+  const { data, isLoading } = useCounts();
   const { play } = usePlayer();
   const { mutateAsync: getTrendingAsync } = useTrending();
   const { mutateAsync } = usesearch();
@@ -77,8 +77,7 @@ export function Hero() {
 
   useEffect(() => {
     const getTrending = async () => {
-      const { data } = await getTrendingAsync({});
-      console.log(data.content);
+      const { data } = await getTrendingAsync({ page: 0 });
       setFeaturedSongs(data.content);
     };
     getTrending();
@@ -90,18 +89,21 @@ export function Hero() {
 
   return (
     <section className="relative min-h-[92vh] overflow-visible">
-      {/* Background image */}
+      {/* Background image & targeted gradient mask */}
       <div className="absolute inset-0 overflow-hidden">
         <Image
-          src="/covers/hero.png"
-          alt=""
+          src="/covers/hero3.png"
+          alt="Nostalgia Background"
           fill
           priority
           sizes="100vw"
-          className="scale-125 object-cover object-center opacity-60"
+          className="object-cover object-right opacity-80"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
+        {/* Darkens the left side for UI readability, leaves the right side clear */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 via-50% to-transparent" />
+        
+        {/* Smooth blend top and bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background" />
       </div>
 
       {/* Ambient glow */}
@@ -185,19 +187,19 @@ export function Hero() {
             variants={item}
             className="mt-12 flex flex-wrap gap-8 border-t border-border pt-6"
           >
-            {stats.map((s) => (
-              <div key={s.label}>
-                <p className="font-display text-2xl font-bold">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </div>
-            ))}
-            <div className="ml-auto hidden items-center gap-2 self-end text-xs text-muted-foreground sm:flex">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-cyan opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-cyan" />
-              </span>
-              {formatCount(featuredSong.listens)} listening now
-            </div>
+            {isLoading
+              ? [0, 1, 2].map((i) => (
+                  <div key={i}>
+                    <Skeleton className="h-8 w-20" />
+                    <Skeleton className="mt-2 h-3 w-28" />
+                  </div>
+                ))
+              : stats.map((s) => (
+                  <div key={s.label}>
+                    <p className="font-display text-2xl font-bold">{s.value}</p>
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                  </div>
+                ))}
           </motion.div>
         </motion.div>
       </div>

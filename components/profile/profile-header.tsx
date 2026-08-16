@@ -9,7 +9,13 @@ import { EditProfileDialog } from "@/components/profile/edit-profile-dialog";
 import { useState } from "react";
 import { useUpdateUser } from "@/hooks/user/useUpdateUser";
 
-export function ProfileHeader({ user,loadUser }: { user: UserDTO,loadUser:()=>void }) {
+export function ProfileHeader({
+  user,
+  loadUser,
+}: {
+  user: UserDTO;
+  loadUser: () => void;
+}) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { mutateAsync } = useUpdateUser();
 
@@ -33,15 +39,14 @@ export function ProfileHeader({ user,loadUser }: { user: UserDTO,loadUser:()=>vo
     ) {
       userform.append("category", String(prof.category));
     }
-   
+
     if (prof.fotoPerfil instanceof File) {
       userform.append("fotoPerfil", prof.fotoPerfil);
     }
- console.log("userform=======>", userform.get("descreption"));
 
     const data = await mutateAsync(userform);
-    loadUser()
-    return  data;
+    loadUser();
+    return data;
   };
   return (
     <>

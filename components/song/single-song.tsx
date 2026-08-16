@@ -29,14 +29,12 @@ const SingleSong = ({ songId }: SongId) => {
 
   const getSong = async () => {
     const { data } = await mutateAsync(songId);
-    console.log("==============", data);
     setSong(data);
   };
 
   const getRelatedSongs = async () => {
     if (song?.category == null) return;
 
-    console.log("category Song", song?.category?.toString());
     const { data } = await relatedSongsMute({
       column: SongFilters.category,
       size: 10,
@@ -52,8 +50,6 @@ const SingleSong = ({ songId }: SongId) => {
 
   const getTrendingSongs = async () => {
     const { data } = await trending({});
-
-    console.log(data.content);
     setTrendingSongs(data.content);
   };
 

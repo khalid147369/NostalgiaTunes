@@ -1,35 +1,40 @@
-'use client'
+"use client";
 
-import { useRef } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Headphones, Heart, Play } from 'lucide-react'
-import type { Song } from '@/types'
-import { SongCard } from './song-card'
-import { useSinglSong } from '@/hooks/songs/useSinglSong'
+import { useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Headphones,
+  Heart,
+  Play,
+} from "lucide-react";
+import type { Song } from "@/types";
+import { SongCard } from "./song-card";
+import { useSinglSong } from "@/hooks/songs/useSinglSong";
 
 function formatCompact(n: number) {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
-  return n.toString()
+  if (n >= 1_000_000)
+    return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toString();
 }
 
 interface SongCarouselProps {
-  eyebrow: string
-  title: string
-  songs: Song[]
+  eyebrow: string;
+  title: string;
+  songs: Song[];
 }
 
 export function SongCarousel({ eyebrow, title, songs }: SongCarouselProps) {
-  const scrollerRef = useRef<HTMLDivElement>(null)
+  const scrollerRef = useRef<HTMLDivElement>(null);
 
-  console.log("songss",songs);
   const scrollBy = (dir: 1 | -1) => {
-    scrollerRef.current?.scrollBy({ left: dir * 320, behavior: 'smooth' })
-  }
+    scrollerRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+  };
 
-console.log("songs",songs);
   return (
     <section aria-label={title} className="relative z-10 px-4 py-10 md:px-6">
       <div className="mx-auto max-w-6xl">
@@ -66,16 +71,16 @@ console.log("songs",songs);
           ref={scrollerRef}
           className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {songs.length!==0 &&
-          songs?.map((song, i) => (
-            <SongCard
-            key={song.id}
-            song={song}
-            className="w-44 shrink-0 snap-start sm:w-52"
-          />
-          ))}
+          {songs.length !== 0 &&
+            songs?.map((song, i) => (
+              <SongCard
+                key={song.id}
+                song={song}
+                className="w-36 shrink-0 snap-start sm:w-44 md:w-48 lg:w-52"
+              />
+            ))}
         </div>
       </div>
     </section>
-  )
+  );
 }
