@@ -3,7 +3,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Music2 } from "lucide-react";
-import { type Song, type CategoryDTO, Categoryies, CategorySlug } from "@/types";
+import {
+  type Song,
+  type CategoryDTO,
+  Categoryies,
+  CategorySlug,
+} from "@/types";
 
 interface SearchResultsProps {
   open: boolean;
@@ -13,8 +18,6 @@ interface SearchResultsProps {
   onSelectCategory?: (id: number | null) => void;
   onSelectSong: (song: Song) => void;
 }
-
-
 
 export default function SearchResults({
   open,
@@ -32,41 +35,43 @@ export default function SearchResults({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.98 }}
           transition={{ duration: 0.2 }}
-          className="relative left-0 right-0 -top-20 z-50 mt-3 overflow-hidden rounded-3xl border border-violet-500/20 bg-[#0f172a]/95 backdrop-blur-xl shadow-[0_0_50px_rgba(139,92,246,.2)] "
+          className="absolute z-50 top-11 mt-2 w-full max-w-xl overflow-hidden rounded-3xl border border-violet-500/20 bg-[#0f172a]/95 backdrop-blur-xl shadow-[0_0_50px_rgba(139,92,246,.2)]"
         >
           {/* Categorías */}
           <div className="border-b border-white/5 p-4">
             <div className="flex gap-2 overflow-x-auto scrollbar-none">
-              {categories&& <button
-                onClick={() => onSelectCategory?.(null)}
-                className={`rounded-full px-4 py-2 text-sm transition ${
-                  selectedCategory == null
-                    ? "bg-violet-600 text-white"
-                    : "bg-white/5 text-gray-300 hover:bg-white/10"
-                }`}
-              >
-                All
-              </button>}
-              
-
-              {categories &&categories.map((category) => (
+              {categories && (
                 <button
-                  key={category.id}
-                  onClick={() => onSelectCategory?.(Number(category.id))}
-                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
-                    selectedCategory === Number(category.id)
-                      ? "bg-cyan-500 text-black"
+                  onClick={() => onSelectCategory?.(null)}
+                  className={`rounded-full px-4 py-2 text-sm transition ${
+                    selectedCategory == null
+                      ? "bg-violet-600 text-white"
                       : "bg-white/5 text-gray-300 hover:bg-white/10"
                   }`}
                 >
-                  {category.nombre}
+                  All
                 </button>
-              ))}
+              )}
+
+              {categories &&
+                categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => onSelectCategory?.(Number(category.id))}
+                    className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
+                      selectedCategory === Number(category.id)
+                        ? "bg-cyan-500 text-black"
+                        : "bg-white/5 text-gray-300 hover:bg-white/10"
+                    }`}
+                  >
+                    {category.nombre}
+                  </button>
+                ))}
             </div>
           </div>
 
           {/* Resultados */}
-          <div className="max-h-[420px] overflow-y-auto">
+          <div className="max-h-[60vh] sm:max-h-[420px] overflow-y-auto">
             {songs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                 <Music2 className="mb-4 h-10 w-10 opacity-50" />

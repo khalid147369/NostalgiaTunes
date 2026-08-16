@@ -158,19 +158,21 @@ export function Categoryhero({ category }: { category: CategoryDTO }) {
           </motion.div>
 
           <motion.div variants={item} className="mt-10">
-            <SearchBar
-              handleChange={handleChange}
-              value={value}
-              placeholder={`Search a ${category.nombre} song you loved...`}
-              trending={trending}
-            />
-            <SearchResults
-              open={value.length > 0}
-              songs={songs}
-              onSelectSong={(song: Song) => {
-                router.push(`/song/${song.id}`);
-              }}
-            />
+            <div className="relative w-full max-w-xl">
+              <SearchBar
+                handleChange={handleChange}
+                value={value}
+                placeholder={`Search a ${category.nombre} song you loved...`}
+                trending={trending}
+              />
+              <SearchResults
+                open={value.length > 0}
+                songs={songs}
+                onSelectSong={(song: Song) => {
+                  router.push(`/song/${song.id}`);
+                }}
+              />
+            </div>
           </motion.div>
 
           <motion.div

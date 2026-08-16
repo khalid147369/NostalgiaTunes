@@ -101,7 +101,7 @@ export function Hero() {
         />
         {/* Darkens the left side for UI readability, leaves the right side clear */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 via-50% to-transparent" />
-        
+
         {/* Smooth blend top and bottom */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background" />
       </div>
@@ -165,22 +165,24 @@ export function Hero() {
           </motion.div>
 
           <motion.div variants={item} className="mt-10">
-            <SearchBar
-              handleChange={handleChange}
-              value={value}
-              trending={featuredSongs}
-              placeholder="Search a cartoon, anime or song you loved..."
-            />
-            <SearchResults
-              open={value.length > 0}
-              songs={songs}
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-              onSelectSong={(song: Song) => {
-                router.push(`/song/${song.id}`);
-              }}
-            />
+            <div className="relative w-full max-w-xl">
+              <SearchBar
+                handleChange={handleChange}
+                value={value}
+                trending={featuredSongs}
+                placeholder="Search a cartoon, anime or song you loved..."
+              />
+              <SearchResults
+                open={value.length > 0}
+                songs={songs}
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+                onSelectSong={(song: Song) => {
+                  router.push(`/song/${song.id}`);
+                }}
+              />
+            </div>
           </motion.div>
 
           <motion.div
