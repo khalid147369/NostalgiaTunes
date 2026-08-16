@@ -22,12 +22,18 @@ const sora = Sora({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://nostalgiatunes.com"),
-  
+
+  // Verificación de Google Search Console
+  verification: {
+    google: "1uf-nf3m4e2X6o_ZyrTmqWJP3qDfdrSK4HRpCM3m6lU",
+  },
+
   title: {
-    default: "NostalgiaTunes — Relive the music of your childhood | نوستالجيا تيونز",
+    default:
+      "NostalgiaTunes — Relive the music of your childhood | نوستالجيا تيونز",
     template: "%s | NostalgiaTunes",
   },
-  
+
   description:
     "A magical journey through classic anime & cartoon songs (EN/AR). إكتشف واستمع إلى أفضل الأغاني الشارات الكرتونية التي صنعت الذكريات.",
 
@@ -59,7 +65,7 @@ export const metadata: Metadata = {
     siteName: "NostalgiaTunes",
     images: [
       {
-        url: "/og-image.jpg", // Asegúrate de colocar esta imagen en tu carpeta public/
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "NostalgiaTunes Preview",
