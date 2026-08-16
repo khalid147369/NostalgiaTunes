@@ -21,10 +21,72 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "Nostalgia Songs — Relive the music of your childhood",
+  metadataBase: new URL("https://nostalgiatunes.com"),
+  
+  title: {
+    default: "NostalgiaTunes — Relive the music of your childhood | نوستالجيا تيونز",
+    template: "%s | NostalgiaTunes",
+  },
+  
   description:
-    "A magical journey through the classic cartoon and anime opening & ending songs of the late 90s and early 2000s. I remember this song...",
-  generator: "v0.app",
+    "A magical journey through classic anime & cartoon songs (EN/AR). إكتشف واستمع إلى أفضل الأغاني الشارات الكرتونية التي صنعت الذكريات.",
+
+  keywords: [
+    "NostalgiaTunes",
+    "anime songs",
+    "cartoon openings",
+    "90s nostalgia",
+    "2000s anime",
+    "أغاني سبيستون",
+    "كرتون قديم",
+    "شارات الكرتون",
+    "نوستالجيا",
+  ],
+
+  alternates: {
+    canonical: "https://nostalgiatunes.com",
+    languages: {
+      en: "https://nostalgiatunes.com",
+      ar: "https://nostalgiatunes.com",
+    },
+  },
+
+  openGraph: {
+    title: "NostalgiaTunes — Relive the music of your childhood",
+    description:
+      "A magical journey through classic cartoon and anime songs. رحلة سحرية عبر أجمل أغاني الكرتون والأنمي.",
+    url: "https://nostalgiatunes.com",
+    siteName: "NostalgiaTunes",
+    images: [
+      {
+        url: "/og-image.jpg", // Asegúrate de colocar esta imagen en tu carpeta public/
+        width: 1200,
+        height: 630,
+        alt: "NostalgiaTunes Preview",
+      },
+    ],
+    locale: "en_US",
+    alternateLocale: ["ar_SA"],
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "NostalgiaTunes — Relive the music of your childhood",
+    description: "A magical journey through classic cartoon and anime songs.",
+    images: ["/og-image.jpg"],
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export const viewport: Viewport = {
@@ -41,10 +103,10 @@ export default function RootLayout({
     <html
       lang="en"
       dir="auto"
-      className={`dark bg-background ${inter.variable} ${sora.variable} `}
+      className={`dark bg-background ${inter.variable} ${sora.variable}`}
     >
       <body className="font-sans antialiased">
-        <LoadingSkeleton />{" "}
+        <LoadingSkeleton />
         <AuthProvider>
           <PlayerProvider>
             <SearchFocusProvider>
