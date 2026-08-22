@@ -13,7 +13,8 @@ import { Sidebar } from "./sidebar";
 import { SongsSection } from "./songs-section";
 import { Topbar } from "./topbar";
 import { UsersSection } from "./users-section";
-import { Song } from "@/types";
+import { Song, UserDTO } from "@/types";
+import { useUser } from "@/hooks/auth/useUser";
 
 export type SectionId =
   | "dashboard"
@@ -32,6 +33,8 @@ export function AdminDashboard() {
   const [addSongOpen, setAddSongOpen] = useState(false);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
 
+  const {user,logout} = useUser();
+  const us:UserDTO=user
   function openAddSong() {
     setSelectedSong(null);
     setAddSongOpen(true);
@@ -69,6 +72,8 @@ export function AdminDashboard() {
       >
         <div className="flex flex-col gap-6">
           <Topbar
+           user={us}
+        logout={logout}
             onMenuClick={() => setMobileOpen(true)}
             onQuickAdd={openAddSong}
           />
@@ -83,6 +88,8 @@ export function AdminDashboard() {
       {/* Mobile / tablet layout */}
       <div className="relative flex min-h-svh flex-col gap-6 px-3 pb-6 lg:hidden">
         <Topbar
+         user={us}
+        logout={logout}
           onMenuClick={() => setMobileOpen(true)}
           onQuickAdd={openAddSong}
         />

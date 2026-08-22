@@ -92,7 +92,7 @@ export function Hero() {
       {/* Background image & targeted gradient mask */}
       <div className="absolute inset-0 overflow-hidden">
         <Image
-          src="/covers/hero3.png"
+          src="/covers/hero.png"
           alt="Nostalgia Background"
           fill
           priority

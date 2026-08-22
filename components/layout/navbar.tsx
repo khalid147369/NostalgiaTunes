@@ -14,8 +14,8 @@ import { useSearchFocus } from "@/providers/searchProvider";
 
 const links = [
   { label: "Home", href: "/" },
-  { label: "Categories", href: "/#categories" },
-  { label: "Trending", href: "/#trending" },
+  { label: "Categories", href: "/#Categories" },
+  { label: "Trending", href: "/#Trending" },
   { label: "Favorites", href: "/profile/#favorite-songs-heading" },
 ];
 

@@ -43,8 +43,8 @@ export function FeaturedSong() {
 
   const isActive = currentSong?.id === featuredSong.id;
   const isThisPlaying = isActive && isPlaying;
-  const liked = likedIds.has(featuredSong.id);
-  const saved = SavedSongIds.has(featuredSong.id);
+  const liked = likedIds.has(String(featuredSong.id));
+  const saved = SavedSongIds.has(String(featuredSong.id));
 
   if (isPending) {
     return <FeaturedSongSkeleton />;

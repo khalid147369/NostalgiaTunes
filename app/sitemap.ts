@@ -16,17 +16,12 @@ function normalizeUrl(path: string) {
 }
 
 async function getSongs() {
-  console.error("========== SITEMAP: FETCHING SONGS ==========");
-
   if (!API_URL) {
     console.error("========== SITEMAP: API_URL NO EXISTE ==========");
     return [];
   }
 
   const url = `${API_URL}/songs/getAll?size=1000`;
-
-  console.error("========== SITEMAP API URL ==========");
-  console.error(url);
 
   try {
     const response = await fetch(url, {
@@ -43,9 +38,6 @@ async function getSongs() {
 
     const result = await response.json();
 
-    console.error("========== SITEMAP RESULT ==========");
-    console.error(JSON.stringify(result));
-
     return result.content ?? [];
   } catch (error) {
     console.error("========== SITEMAP FETCH ERROR ==========");
@@ -56,12 +48,7 @@ async function getSongs() {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  console.error("========== SITEMAP EXECUTING ==========");
-
   const songs = await getSongs();
-
-  console.error("========== SONG COUNT ==========");
-  console.error(songs.length);
 
   const home: MetadataRoute.Sitemap = [
     {

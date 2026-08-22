@@ -21,7 +21,7 @@ export function SongCard({ song, className }: SongCardProps) {
   const { play, currentSong, isPlaying, likedIds, toggleLike } = usePlayer();
   const isActive = currentSong?.id === song.id;
   const isThisPlaying = isActive && isPlaying;
-  let liked = likedIds.has(song.id);
+  let liked = likedIds.has(String(song.id));
 
   const { mutate: like } = useLike();
   const { mutate: unlike } = useUnlike();
@@ -40,10 +40,8 @@ export function SongCard({ song, className }: SongCardProps) {
   const handlePlay = () => {
     play(song);
     if (!isThisPlaying) {
-      
       listen(Number(song.id));
     }
-    
   };
   return (
     <motion.article
@@ -105,7 +103,7 @@ export function SongCard({ song, className }: SongCardProps) {
         <div className="mt-auto flex items-center justify-between pt-1">
           <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
             <Headphones className="size-3.5 text-cyan" />
-            {formatCount(song.listens??0)}
+            {formatCount(song.listens ?? 0)}
           </span>
           <button
             type="button"

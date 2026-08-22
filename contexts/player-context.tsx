@@ -29,8 +29,8 @@ interface PlayerContextValue {
   toggle(): void;
   next(): void;
   previous(): void;
-  toggleLike(id: string): void;
-  toggleSavedSong(id: string): void;
+  toggleLike(id: string | number): void;
+  toggleSavedSong(id: string | number): void;
   close(): void;
 }
 
@@ -41,7 +41,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
 
-  const { user } = useUser();
+  const { user, loading } = useUser();
   const router = useRouter();
 
   const [likedIds, setLikedIds] = useState<Set<string>>(() => {
@@ -52,7 +52,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     try {
       const parsedLikes: unknown = JSON.parse(storedLikes);
-      return new Set<string>(Array.isArray(parsedLikes) ? parsedLikes : []);
+      if (Array.isArray(parsedLikes)) {
+        return new Set<string>(parsedLikes.map((v) => String(v)));
+      }
+      return new Set<string>();
     } catch {
       return new Set<string>();
     }
@@ -66,7 +69,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     try {
       const parsedSaves: unknown = JSON.parse(storedSaves);
-      return new Set<string>(Array.isArray(parsedSaves) ? parsedSaves : []);
+      if (Array.isArray(parsedSaves)) {
+        return new Set<string>(parsedSaves.map((v) => String(v)));
+      }
+      return new Set<string>();
     } catch {
       return new Set<string>();
     }
@@ -148,41 +154,53 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // TODO
   };
 
-  const toggleLike = useCallback((id: string) => {
-    if (!user) {
-      router.push("/register");
-      return;
-    }
-    setLikedIds((prev) => {
-      const next = new Set(prev);
-
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
+  const toggleLike = useCallback(
+    (id: string | number) => {
+      if (!user && !loading) {
+        router.push("/register");
+        return;
       }
-      localStorage.setItem("likes", JSON.stringify([...next]));
-      return next;
-    });
-  }, []);
 
-  const toggleSavedSong = useCallback((id: string) => {
-    if (!user) {
-      router.push("/register");
-      return;
-    }
-    setSavedsongIds((prev) => {
-      const next = new Set(prev);
+      const sid = String(id);
 
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
+      setLikedIds((prev) => {
+        const next = new Set(prev);
+
+        if (next.has(sid)) {
+          next.delete(sid);
+        } else {
+          next.add(sid);
+        }
+        localStorage.setItem("likes", JSON.stringify([...next]));
+        return next;
+      });
+    },
+    [user, loading, router],
+  );
+
+  const toggleSavedSong = useCallback(
+    (id: string | number) => {
+      if (!user && !loading) {
+        router.push("/register");
+        return;
       }
-      localStorage.setItem("SavedSongs", JSON.stringify([...next]));
-      return next;
-    });
-  }, []);
+
+      const sid = String(id);
+
+      setSavedsongIds((prev) => {
+        const next = new Set(prev);
+
+        if (next.has(sid)) {
+          next.delete(sid);
+        } else {
+          next.add(sid);
+        }
+        localStorage.setItem("SavedSongs", JSON.stringify([...next]));
+        return next;
+      });
+    },
+    [user, loading, router],
+  );
 
   const value = useMemo(
     () => ({

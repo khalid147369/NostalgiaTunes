@@ -20,7 +20,6 @@ import { formatDuration } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
-
 export function MusicPlayer() {
   const {
     currentSong,
@@ -32,8 +31,6 @@ export function MusicPlayer() {
     toggleLike,
     close,
   } = usePlayer();
-
-
 
   const duration = currentSong?.duration ?? 0;
 
@@ -94,7 +91,7 @@ export function MusicPlayer() {
                 <Heart
                   className={cn(
                     "size-4 transition-all",
-                    likedIds.has(currentSong.id)
+                    likedIds.has(String(currentSong.id))
                       ? "fill-primary text-primary"
                       : "text-muted-foreground hover:text-foreground",
                   )}

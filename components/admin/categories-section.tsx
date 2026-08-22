@@ -12,7 +12,10 @@ import { timeAgo } from "@/lib/utils";
 
 export function CategoriesSection() {
   const { data, isLoading } = useCategories();
-  const categories: CategoryDTO[] = data?.data || [];
+  const raw = data?.data;
+  const categories: CategoryDTO[] = Array.isArray(raw)
+    ? raw
+    : (raw?.content ?? raw?.categories ?? []);
 
   return (
     <div className="space-y-6">

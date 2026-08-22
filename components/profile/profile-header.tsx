@@ -78,10 +78,7 @@ export function ProfileHeader({
         </motion.div>
 
         <div className="flex flex-1 flex-col items-center gap-3 md:items-start">
-          <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent">
-            <Sparkles className="size-3.5" aria-hidden="true" />
-            The soundtrack of a generation
-          </span>
+     
           <h1
             id="profile-heading"
             className="text-4xl font-bold tracking-tight text-balance md:text-5xl"

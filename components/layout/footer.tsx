@@ -1,27 +1,28 @@
-import Link from 'next/link'
-import { AtSign, Disc3, Radio, Rss, Send } from 'lucide-react'
+import Link from "next/link";
+import { AtSign, Disc3, Radio, Rss, Send } from "lucide-react";
+import { CategorySlug } from "@/types";
 
 const columns = [
   {
-    title: 'Explore',
-    links: ['Trending', 'Recently added', 'Most listened', 'Categories'],
+    title: "Explore",
+    links: ["Trending", "Recently added", "Most listened", "Categories"],
   },
   {
-    title: 'Universes',
-    links: ['Spacetoon', 'Cartoon Network', 'Anime', 'Disney', 'Jetix'],
+    title: "Universes",
+    links: ["Spacetoon", "CartoonNetwork", "Anime", "Spacepower", "MBC3","AnotherChannels"],
   },
   {
-    title: 'Company',
-    links: ['About', 'Our story', 'Contact', 'Careers'],
+    title: "Company",
+    links: ["About", "Our story", "Contact", "Careers"],
   },
-]
+];
 
 const socials = [
-  { icon: AtSign, label: 'Follow us' },
-  { icon: Send, label: 'Newsletter' },
-  { icon: Radio, label: 'Live radio' },
-  { icon: Rss, label: 'RSS feed' },
-]
+  { icon: AtSign, label: "Follow us" },
+  { icon: Send, label: "Newsletter" },
+  { icon: Radio, label: "Live radio" },
+  { icon: Rss, label: "RSS feed" },
+];
 
 export function Footer() {
   return (
@@ -57,16 +58,27 @@ export function Footer() {
 
           {columns.map((col) => (
             <div key={col.title} className="space-y-3">
-              <h3 className="font-display text-sm font-semibold">{col.title}</h3>
+              <h3 className="font-display text-sm font-semibold">
+                {col.title}
+              </h3>
               <ul className="space-y-2">
                 {col.links.map((link) => (
                   <li key={link}>
-                    <Link
-                      href="#"
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {link}
-                    </Link>
+                    {col.title === "Universes" ? (
+                      <Link
+                        href={`/category/${CategorySlug[link as keyof typeof CategorySlug]}`}
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {link}
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/#${link}`}
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {link}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -96,5 +108,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

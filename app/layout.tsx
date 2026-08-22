@@ -9,6 +9,7 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import LoadingSkeleton from "@/components/loadingScreen/LoadingSkeleton";
 import { SearchFocusProvider } from "@/providers/searchProvider";
 import { PlayerProvider } from "@/contexts/player-context";
+import { MusicPlayer } from "@/components/player/music-player";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -147,6 +148,8 @@ export default function RootLayout({
           <PlayerProvider>
             <SearchFocusProvider>
               <Providers>{children}</Providers>
+              {/* Global music player (inside PlayerProvider so it can use context) */}
+              <MusicPlayer />
             </SearchFocusProvider>
           </PlayerProvider>
         </AuthProvider>

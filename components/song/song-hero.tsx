@@ -17,44 +17,45 @@ interface SongHeroProps {
 }
 
 export function SongHero({ song }: SongHeroProps) {
- 
-  const { play, pause, isPlaying,currentSong,likedIds,toggleLike,toggleSavedSong,SavedSongIds} = usePlayer();
+  const {
+    play,
+    pause,
+    isPlaying,
+    currentSong,
+    likedIds,
+    toggleLike,
+    toggleSavedSong,
+    SavedSongIds,
+  } = usePlayer();
 
-  const {mutate:like} = useLike();
-  const {mutate:unlike} = useUnlike();
+  const { mutate: like } = useLike();
+  const { mutate: unlike } = useUnlike();
 
-  const {mutate:save} = useSave();
-  const {mutate:unsave} = useUnsave();
+  const { mutate: save } = useSave();
+  const { mutate: unsave } = useUnsave();
 
- const {mutate:listen} = useListen();
+  const { mutate: listen } = useListen();
 
+  const liked = likedIds.has(String(song.id));
+  const saved = SavedSongIds.has(String(song.id));
 
- const liked = likedIds.has(song.id);
- const saved = SavedSongIds.has(song.id);
-
-  const handleLike = ()=>{
-    
-    
+  const handleLike = () => {
     if (liked) {
-      unlike(Number(song.id))
-      
-    }else{
-      like(Number(song.id))
+      unlike(Number(song.id));
+    } else {
+      like(Number(song.id));
     }
-    toggleLike(song.id)
-  }
+    toggleLike(song.id);
+  };
 
-    const handleSave = ()=>{
-    
-    
+  const handleSave = () => {
     if (saved) {
-      unsave(Number(song.id))
-      
-    }else{
-      save(Number(song.id))
+      unsave(Number(song.id));
+    } else {
+      save(Number(song.id));
     }
-    toggleSavedSong(song.id)
-  }
+    toggleSavedSong(song.id);
+  };
 
   return (
     <section className="relative pt-32 pb-8 md:pt-40">
@@ -116,7 +117,7 @@ export function SongHero({ song }: SongHeroProps) {
 
           {/* Primary actions */}
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            {isPlaying && currentSong?.id===song.id ? (
+            {isPlaying && currentSong?.id === song.id ? (
               <motion.button
                 type="button"
                 whileHover={{ scale: 1.05 }}
@@ -133,7 +134,9 @@ export function SongHero({ song }: SongHeroProps) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
                 className="flex items-center gap-2.5 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground glow-primary"
-                onClick={() =>{ play(song),listen(Number(song.id))}}
+                onClick={() => {
+                  (play(song), listen(Number(song.id)));
+                }}
               >
                 <Play className="h-4 w-4 fill-current" />
                 Play now

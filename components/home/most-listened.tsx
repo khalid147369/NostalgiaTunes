@@ -44,7 +44,10 @@ export function MostListened() {
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+    <section
+      id="Most listened"
+      className="mx-auto max-w-7xl px-4 py-16 sm:px-6"
+    >
       <SectionHeading
         eyebrow="Hall of fame"
         title="Most listened of all time"
@@ -55,7 +58,7 @@ export function MostListened() {
         {mostListenedSongs.map((song, i) => {
           const isActive = currentSong?.id === song.id;
           const isThisPlaying = isActive && isPlaying;
-          const liked = likedIds.has(song.id);
+          const liked = likedIds.has(String(song.id));
           return (
             <motion.div
               key={song.id}

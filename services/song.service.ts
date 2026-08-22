@@ -16,8 +16,8 @@ export const SongService = {
     return api.get(`/songs/getAll?isNew=true&size=${size}&page=${page}`);
   },
 
-  getRecentlyPlayed() {
-    return api.get("/users/recentlyPlayedSongs");
+  getRecentlyPlayed(size: number = 6, page: number = 0) {
+    return api.get(`/users/recentlyPlayedSongs?size=${size}&page=${page}`);
   },
 
   getMostListened(size = 7, page = 0) {

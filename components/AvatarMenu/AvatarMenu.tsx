@@ -16,7 +16,7 @@ import Link from "next/link";
 import { LoadingScreen } from "../loadingScreen/LoadingScreen";
 import { UserDTO } from "@/types";
 
-export default function AvatarMenu({ user,logout }: { user: UserDTO,logout:()=>void }) {
+export default function AvatarMenu({ user,logout }: { user: UserDTO | undefined,logout:()=>void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2.5 rounded-full border border-glass-border py-1 pl-1 pr-1 transition-colors hover:bg-secondary/60 sm:pr-3">

@@ -2,23 +2,37 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Bookmark, Headphones, Heart, Play } from "lucide-react";
+import { Bookmark, Headphones, Heart, Play, Pause } from "lucide-react";
 import { SectionHeading } from "./section-heading";
 import { cn } from "@/lib/utils";
 import { usePlayer } from "@/contexts/player-context";
 import { useSavedSongs } from "@/hooks/savedSongs/useSavedSong";
 import { Song } from "@/types";
 import { useUnsave } from "@/hooks/savedSongs/useUnsave";
+import Link from "next/link";
+import { useLike } from "@/hooks/like/useLike";
+import { useUnlike } from "@/hooks/like/useUnlike";
 
 export function FavoriteSongs({ favoriteSongs }: { favoriteSongs: Song[] }) {
   const [liked, setLiked] = useState<Record<string, boolean>>({
     fs1: true,
     fs3: true,
   });
+  const [likesCount, setLikesCount] = useState<Record<string, number>>({});
   const [saved, setSaved] = useState<Record<string, boolean>>({ fs1: true });
 
-  const { toggleSavedSong, likedIds, toggleLike, SavedSongIds } = usePlayer();
+  const {
+    toggleSavedSong,
+    likedIds,
+    toggleLike,
+    SavedSongIds,
+    play,
+    currentSong,
+    isPlaying,
+  } = usePlayer();
   const { mutate: unsave } = useUnsave();
+  const { mutate: like } = useLike();
+  const { mutate: unlike } = useUnlike();
   useEffect(() => {
     setLiked((prev) => {
       const nextLiked = { ...prev };
@@ -28,6 +42,14 @@ export function FavoriteSongs({ favoriteSongs }: { favoriteSongs: Song[] }) {
       return nextLiked;
     });
   }, [likedIds]);
+
+  useEffect(() => {
+    const counts: Record<string, number> = {};
+    favoriteSongs.forEach((s) => {
+      counts[String(s.id)] = Number(s.likes ?? 0);
+    });
+    setLikesCount(counts);
+  }, [favoriteSongs]);
 
   useEffect(() => {
     setSaved((prev) => {
@@ -62,17 +84,20 @@ export function FavoriteSongs({ favoriteSongs }: { favoriteSongs: Song[] }) {
               whileHover={{ y: -5 }}
               className="group flex h-full gap-4 rounded-2xl border border-border bg-card/60 p-3 backdrop-blur transition-shadow hover:shadow-[0_0_36px_-10px] hover:shadow-primary"
             >
-              <div className="relative shrink-0 overflow-hidden rounded-xl">
+              <Link
+                href={`/song/${song.id}`}
+                className="relative shrink-0 overflow-hidden rounded-xl"
+              >
                 <img
                   src={song.cover || "/placeholder.svg"}
                   alt={`${song.title} artwork`}
                   className="size-24 object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-              </div>
+              </Link>
               <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
                 <div>
                   <h3 className="truncate text-sm font-semibold text-foreground">
-                    {song.title}
+                    <Link href={`/song/${song.id}`}>{song.title}</Link>
                   </h3>
                   <p className="mt-0.5 inline-flex rounded-full border border-accent/30 bg-accent/10 px-2.5 py-0.5 text-[11px] font-medium text-accent">
                     {song.category}
@@ -93,8 +118,26 @@ export function FavoriteSongs({ favoriteSongs }: { favoriteSongs: Song[] }) {
                       }
                       aria-pressed={liked[song.id] ?? false}
                       onClick={() => {
-                        (setLiked((s) => ({ ...s, [song.id]: !s[song.id] })),
-                          toggleLike(song.id));
+                        const cur = !!liked[song.id];
+                        // update local liked state
+                        setLiked((s) => ({ ...s, [song.id]: !cur }));
+                        // optimistic update of likes count
+                        setLikesCount((c) => ({
+                          ...c,
+                          [song.id]:
+                            (c[String(song.id)] ?? Number(song.likes ?? 0)) +
+                            (cur ? -1 : 1),
+                        }));
+
+                        // call API mutations
+                        if (cur) {
+                          unlike(Number(song.id));
+                        } else {
+                          like(Number(song.id));
+                        }
+
+                        // update player context
+                        toggleLike(song.id);
                       }}
                       className={cn(
                         "flex size-8 items-center justify-center rounded-full transition-colors",
@@ -110,6 +153,9 @@ export function FavoriteSongs({ favoriteSongs }: { favoriteSongs: Song[] }) {
                         )}
                         aria-hidden="true"
                       />
+                      <span className=" ml-1 text-[13px] text-muted-foreground">
+                        {likesCount[String(song.id)] ?? song.likes}
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -135,13 +181,28 @@ export function FavoriteSongs({ favoriteSongs }: { favoriteSongs: Song[] }) {
                     </button>
                     <button
                       type="button"
-                      aria-label={`Play ${song.title}`}
+                      aria-label={
+                        currentSong?.id === song.id && isPlaying
+                          ? `Pause ${song.title}`
+                          : `Play ${song.title}`
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        play(song);
+                      }}
                       className="ml-1 flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_16px_-4px] shadow-primary transition-transform hover:scale-110"
                     >
-                      <Play
-                        className="size-3.5  fill-current"
-                        aria-hidden="true"
-                      />
+                      {currentSong?.id === song.id && isPlaying ? (
+                        <Pause
+                          className="size-3.5 fill-current"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <Play
+                          className="size-3.5  fill-current"
+                          aria-hidden="true"
+                        />
+                      )}
                     </button>
                   </div>
                 </div>

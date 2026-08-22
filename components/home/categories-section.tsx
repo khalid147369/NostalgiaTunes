@@ -28,7 +28,7 @@ export function CategoriesSection() {
   };
   return (
     <section
-      id="categories"
+      id="Categories"
       className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6"
     >
       <SectionHeading

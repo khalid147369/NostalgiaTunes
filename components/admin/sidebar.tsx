@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { SectionId } from './dashboard'
 import Logo from '../logo/logo'
+import { UserDTO } from '@/types'
 
 const navItems: { id: SectionId; label: string; icon: React.ElementType }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },

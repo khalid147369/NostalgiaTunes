@@ -22,13 +22,13 @@ export default function HomePage() {
             <FeaturedSong />
             <CategoriesSection />
             <SongCarousel
-              id="trending"
+              id="Trending"
               eyebrow="Everyone is replaying"
               title="Trending right now"
               description="The songs lighting up the community this week."
             />
             <SongGridSection
-              id="recent"
+              id="Recently added"
               eyebrow="Fresh from the vault"
               title="Recently added"
               description="New memories digitized and added to the archive."

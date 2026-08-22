@@ -16,6 +16,7 @@ import { useLastLikedSong } from "@/hooks/Listen/useGetLastLikedSong";
 import { useSavedSongs } from "@/hooks/savedSongs/useSavedSong";
 import { useGetUserComments } from "@/hooks/comments/useUserComment";
 import { Comment } from "@/types";
+import { Navbar } from "../layout/navbar";
 
 export const metadata: Metadata = {
   title: "Retro Kid — Profile | NostalgiaSongs",
@@ -49,13 +50,13 @@ const Profile = () => {
         <div className="absolute top-1/2 right-0 size-80 rounded-full bg-accent/10 blur-[120px]" />
       </div>
 
-      <ProfileNav />
+      <Navbar />
 
       <main className="relative mx-auto flex max-w-6xl flex-col gap-16 px-4 pb-24 pt-32 md:gap-20 md:px-6">
         <ProfileHeader user={user} loadUser={loadUser} />
         <ProfileStats user={user} />
         <FavoriteCategories />
-        <RecentlyPlayed songs={songs} />
+        <RecentlyPlayed />
         <FavoriteSongs favoriteSongs={favoriteSongs} />
         <ListeningActivity
           lastPlayedSong={songs[0]}
