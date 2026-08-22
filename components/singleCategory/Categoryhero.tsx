@@ -73,7 +73,7 @@ export function Categoryhero({ category }: { category: CategoryDTO }) {
 
   useEffect(() => {
     const getTrending = async () => {
-      const { data } = await getTrendingAsync(Number(category.id));
+      const { data } = await getTrendingAsync({ category: Number(category.id) });
       setTrending(data.content);
     };
     getTrending();
@@ -122,9 +122,9 @@ export function Categoryhero({ category }: { category: CategoryDTO }) {
             variants={item}
             className="mt-6 font-display text-4xl font-bold leading-[1.05] tracking-tight text-balance sm:text-6xl lg:text-7xl"
           >
-            I remember
+            I remember this song from
             <br />
-            <span className="text-gradient glow-text">this song...</span>
+            <span className="text-gradient glow-text"> {category.nombre} </span>
           </motion.h1>
 
           <motion.p
@@ -132,7 +132,7 @@ export function Categoryhero({ category }: { category: CategoryDTO }) {
             className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg"
             id="search"
           >
-            Relive the opening and ending themes of the cartoons and anime that
+            Relive the opening and ending themes of {category.nombre} cartoons that
             raised you. Every melody is a doorway back to a Saturday morning in
             the late 90s.
           </motion.p>

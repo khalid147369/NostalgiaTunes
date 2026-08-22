@@ -1,7 +1,9 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
+
 import "./globals.css";
+
 import Providers from "@/providers/QueryProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import LoadingSkeleton from "@/components/loadingScreen/LoadingSkeleton";
@@ -20,79 +22,106 @@ const sora = Sora({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://nostalgiatunes.com"),
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://nostalgiatunes.com";
 
-  // Verificación de Google Search Console
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+
   verification: {
     google: "1uf-nf3m4e2X6o_ZyrTmqWJP3qDfdrSK4HRpCM3m6lU",
   },
 
   title: {
-    default:
-      "NostalgiaTunes — Relive the music of your childhood | نوستالجيا تيونز",
+    default: "NostalgiaTunes — شارات سبيستون وشارات الكرتون والأنمي",
     template: "%s | NostalgiaTunes",
   },
 
   description:
-    "A magical journey through classic anime & cartoon songs (EN/AR). إكتشف واستمع إلى أفضل الأغاني الشارات الكرتونية التي صنعت الذكريات.",
+    "استمع إلى شارات سبيستون وشارات الكرتون والأنمي التي صنعت ذكريات الطفولة. Discover classic Spacetoon, anime and cartoon openings on NostalgiaTunes.",
 
   keywords: [
     "NostalgiaTunes",
+    "شارات سبيستون",
+    "شارات سبيستون",
+    "شارات الكرتون",
+    "شارات الكرتون",
+    "كرتون قديم",
+    "شارات الأنمي",
+    "Spacetoon songs",
+    "Spacetoon openings",
     "anime songs",
+    "cartoon songs",
     "cartoon openings",
     "90s nostalgia",
     "2000s anime",
-    "أغاني سبيستون",
-    "كرتون قديم",
-    "شارات الكرتون",
-    "نوستالجيا",
   ],
 
-  alternates: {
-    canonical: "https://nostalgiatunes.com",
-    languages: {
-      en: "https://nostalgiatunes.com",
-      ar: "https://nostalgiatunes.com",
+  authors: [
+    {
+      name: "NostalgiaTunes",
+      url: SITE_URL,
     },
+  ],
+
+  creator: "NostalgiaTunes",
+  publisher: "NostalgiaTunes",
+
+  alternates: {
+    canonical: SITE_URL,
   },
 
   openGraph: {
-    title: "NostalgiaTunes — Relive the music of your childhood",
+    title: "NostalgiaTunes — شارات سبيستون وشارات الكرتون والأنمي",
+
     description:
-      "A magical journey through classic cartoon and anime songs. رحلة سحرية عبر أجمل أغاني الكرتون والأنمي.",
-    url: "https://nostalgiatunes.com",
+      "استمع إلى أجمل شارات سبيستون وشارات الكرتون والأنمي التي صنعت ذكريات الطفولة.",
+
+    url: SITE_URL,
+
     siteName: "NostalgiaTunes",
+
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "NostalgiaTunes Preview",
+        alt: "NostalgiaTunes — شارات سبيستون وشارات الكرتون",
       },
     ],
-    locale: "en_US",
-    alternateLocale: ["ar_SA"],
+
+    locale: "ar_SA",
+
+    alternateLocale: ["en_US"],
+
     type: "website",
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "NostalgiaTunes — Relive the music of your childhood",
-    description: "A magical journey through classic cartoon and anime songs.",
+
+    title: "NostalgiaTunes — شارات سبيستون وشارات الكرتون والأنمي",
+
+    description: "استمع إلى شارات سبيستون وشارات الكرتون والأنمي القديمة.",
+
     images: ["/og-image.jpg"],
   },
 
   robots: {
     index: true,
     follow: true,
+
     googleBot: {
       index: true,
       follow: true,
+
       "max-image-preview": "large",
       "max-snippet": -1,
+      "max-video-preview": -1,
     },
   },
+
+  category: "music",
 };
 
 export const viewport: Viewport = {
@@ -107,12 +136,13 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="ar"
       dir="auto"
       className={`dark bg-background ${inter.variable} ${sora.variable}`}
     >
       <body className="font-sans antialiased">
         <LoadingSkeleton />
+
         <AuthProvider>
           <PlayerProvider>
             <SearchFocusProvider>
@@ -120,7 +150,8 @@ export default function RootLayout({
             </SearchFocusProvider>
           </PlayerProvider>
         </AuthProvider>
-        {process.env.NODE_ENV === "production" && <Analytics />}
+
+        <Analytics />
       </body>
     </html>
   );

@@ -15,12 +15,13 @@ import { AxiosResponse } from "axios";
 import { Navbar } from "../layout/navbar";
 import { useTrending } from "@/hooks/songs/useTrendingSongs";
 
-interface SongId {
+interface SingleSongProps {
   songId: number;
+  initialSong?: Song | null;
 }
 
-const SingleSong = ({ songId }: SongId) => {
-  const [song, setSong] = useState<Song>();
+const SingleSong = ({ songId, initialSong }: SingleSongProps) => {
+  const [song, setSong] = useState<Song | undefined>(initialSong ?? undefined);
   const [relatedSongs, setRelatedSongs] = useState<Song[]>([]);
   const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
   const { mutateAsync, isPending } = useSinglSong();
@@ -54,7 +55,8 @@ const SingleSong = ({ songId }: SongId) => {
   };
 
   useEffect(() => {
-    getSong();
+
+    if (!song) getSong();
     getTrendingSongs();
   }, []);
 

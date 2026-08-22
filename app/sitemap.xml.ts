@@ -1,29 +1,97 @@
+import type { MetadataRoute } from "next";
+
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.SITE_URL ||
   "https://nostalgiatunes.com";
 
-const staticRoutes = [
-  "/"
-];
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-function createUrl(path: string) {
-  const loc = `${SITE_URL.replace(/\/$/, "")}${path}`;
-  const lastmod = new Date().toISOString();
-  return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
+const CATEGORY_IDS = [1, 2, 3, 4, 5, 6];
+
+function normalizeUrl(path: string) {
+  return `${SITE_URL.replace(/\/$/, "")}${path}`;
 }
 
-export async function GET() {
-  const urls = staticRoutes.map(createUrl).join("\n");
+async function getSongs() {
+  if (!API_URL) {
+    console.error("NEXT_PUBLIC_API_URL no está configurada");
+    return [];
+  }
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`;
+  try {
+    const response = await fetch(
+      `${API_URL}/songs/getAll?size=1000`,
+      {
+        next: {
+          revalidate: 3600,
+        },
+      }
+    );
 
-  return new Response(xml, {
-    headers: {
-      "Content-Type": "application/xml",
-      "Cache-Control": "public, max-age=0, s-maxage=3600",
+    if (!response.ok) {
+      console.error(
+        "Error obteniendo canciones para sitemap:",
+        response.status
+      );
+
+      return [];
+    }
+
+    const result = await response.json();
+
+    return result.data ?? [];
+  } catch (error) {
+    console.error("Error obteniendo canciones para sitemap:", error);
+
+    return [];
+  }
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const songs = await getSongs();
+
+  // Página principal
+  const home: MetadataRoute.Sitemap = [
+    {
+      url: normalizeUrl("/"),
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 1,
     },
-  });
-}
+  ];
 
-export const runtime = "edge";
+  // Categorías
+  const categories: MetadataRoute.Sitemap = CATEGORY_IDS.map((id) => ({
+    url: normalizeUrl(`/category/${id}`),
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.9,
+  }));
+
+  // Canciones
+  const songPages: MetadataRoute.Sitemap = songs
+    .filter((song: { id?: number }) => song.id)
+    .map(
+      (song: {
+        id: number;
+        fechaCreacion?: string;
+      }) => ({
+        url: normalizeUrl(`/song/${song.id}`),
+
+        lastModified: song.fechaCreacion
+          ? new Date(song.fechaCreacion)
+          : new Date(),
+
+        changeFrequency: "weekly" as const,
+
+        priority: 0.8,
+      })
+    );
+
+  return [
+    ...home,
+    ...categories,
+    ...songPages,
+  ];
+}
