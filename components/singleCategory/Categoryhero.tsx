@@ -73,7 +73,9 @@ export function Categoryhero({ category }: { category: CategoryDTO }) {
 
   useEffect(() => {
     const getTrending = async () => {
-      const { data } = await getTrendingAsync({ category: Number(category.id) });
+      const { data } = await getTrendingAsync({
+        category: Number(category.id),
+      });
       setTrending(data.content);
     };
     getTrending();
@@ -132,9 +134,9 @@ export function Categoryhero({ category }: { category: CategoryDTO }) {
             className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg"
             id="search"
           >
-            Relive the opening and ending themes of {category.nombre} cartoons that
-            raised you. Every melody is a doorway back to a Saturday morning in
-            the late 90s.
+            Relive the opening and ending themes of {category.nombre} cartoons
+            that raised you. Every melody is a doorway back to a Saturday
+            morning in the late 90s.
           </motion.p>
 
           <motion.div
