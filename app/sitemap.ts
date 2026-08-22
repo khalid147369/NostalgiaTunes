@@ -20,19 +20,16 @@ async function getSongs() {
   }
 
   try {
-    const response = await fetch(
-      `${API_URL}/songs/getAll?size=1000`,
-      {
-        next: {
-          revalidate: 3600,
-        },
-      }
-    );
+    const response = await fetch(`${API_URL}/songs/getAll?size=1000`, {
+      next: {
+        revalidate: 3600,
+      },
+    });
 
     if (!response.ok) {
       console.error(
         "Error obteniendo canciones para sitemap:",
-        response.status
+        response.status,
       );
 
       return [];
@@ -72,26 +69,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Canciones
   const songPages: MetadataRoute.Sitemap = songs
     .filter((song: { id?: number }) => song.id)
-    .map(
-      (song: {
-        id: number;
-        fechaCreacion?: string;
-      }) => ({
-        url: normalizeUrl(`/song/${song.id}`),
+    .map((song: { id: number; fechaCreacion?: string }) => ({
+      url: normalizeUrl(`/song/${song.id}`),
 
-        lastModified: song.fechaCreacion
-          ? new Date(song.fechaCreacion)
-          : new Date(),
+      lastModified: song.fechaCreacion
+        ? new Date(song.fechaCreacion)
+        : new Date(),
 
-        changeFrequency: "weekly" as const,
+      changeFrequency: "weekly" as const,
 
-        priority: 0.8,
-      })
-    );
+      priority: 0.8,
+    }));
 
-  return [
-    ...home,
-    ...categories,
-    ...songPages,
-  ];
+  return [...home, ...categories, ...songPages];
 }
