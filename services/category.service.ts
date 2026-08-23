@@ -9,11 +9,13 @@ export const CategoryService = {
     return api.get(`/categories/getById/${id}`);
   },
 
-  getMostListenedByCategory(size?:number,category?:number) {
-    return api.get(`/songs/getAll?category=${category}&sort=listens,desc&size=${size}`);
+  getMostListenedByCategory(size?: number, category?: number) {
+    return api.get(
+      `/songs/getAll?category=${category}&sort=numEscuchas,desc&size=${size}`,
+    );
   },
 
-    getSongsByCategory(size?:number,category?:number) {
+  getSongsByCategory(size?: number, category?: number) {
     return api.get(`/songs/getAll?category=${category}&size=${size}`);
   },
 

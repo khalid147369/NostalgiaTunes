@@ -72,23 +72,29 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
         {category && <Categoryhero category={category} />}
       </div>
 
-      <SongCarousel
-        eyebrow="Trending right now"
-        title="The songs lighting up the community this week."
-        songs={songs}
-      />
+      {songs.length > 0 && (
+        <SongCarousel
+          eyebrow="Trending right now"
+          title="The songs lighting up the community this week."
+          songs={songs}
+        />
+      )}
 
-      <SongCarousel
-        eyebrow="Most Listened this week"
-        title="The songs lighting up the community this week."
-        songs={mostListenedSong}
-      />
+      {mostListenedSong.length > 0 && (
+        <SongCarousel
+          eyebrow="Most Listened this week"
+          title="The songs lighting up the community this week."
+          songs={mostListenedSong}
+        />
+      )}
 
-      <SongCarousel
-        eyebrow="Related songs"
-        title="From the same universe"
-        songs={SongsByCategory}
-      />
+      {SongsByCategory.length > 0 && (
+        <SongCarousel
+          eyebrow="Related songs"
+          title="From the same universe"
+          songs={SongsByCategory}
+        />
+      )}
     </div>
   );
 };
