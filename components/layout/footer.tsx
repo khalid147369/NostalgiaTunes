@@ -35,7 +35,7 @@ export function Footer() {
                 <Disc3 className="size-5" />
               </span>
               <span className="font-display text-lg font-bold tracking-tight">
-                Nostalgia<span className="text-gradient">Songs</span>
+                Nostalgia<span className="text-gradient">Tunes</span>
               </span>
             </Link>
             <p className="max-w-xs text-pretty text-sm leading-relaxed text-muted-foreground">

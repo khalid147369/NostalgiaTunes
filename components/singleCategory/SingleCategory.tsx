@@ -75,7 +75,7 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
       {songs.length > 0 && (
         <SongCarousel
           eyebrow="Trending right now"
-          title="The songs lighting up the community this week."
+          title="The songs Trending this week."
           songs={songs}
         />
       )}
