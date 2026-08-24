@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   AlertTriangle,
@@ -9,6 +9,7 @@ import {
   Heart,
   Pencil,
   Plus,
+  Search,
   Trash2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/adminUi/badge";
@@ -26,6 +27,8 @@ import { SectionHeader } from "./section-header";
 import { useSongs } from "@/hooks/songs/useSong";
 import { useDeleteSong } from "@/hooks/songs/useDeleteSong";
 import { Song } from "@/types";
+import { PageBar } from "@/components/ui/page-bar";
+import { Input } from "@/components/ui/adminUi/input";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +44,8 @@ const statusStyles: Record<SongStatus, string> = {
   archived: "border-border bg-secondary/60 text-muted-foreground",
 };
 
+const PAGE_SIZE = 10;
+
 export function SongsSection({
   onAddSong,
   onEditSong,
@@ -48,10 +53,23 @@ export function SongsSection({
   onAddSong: () => void;
   onEditSong: (song: Song) => void;
 }) {
-  const { data } = useSongs();
+  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data, isFetching } = useSongs(PAGE_SIZE, page, searchQuery);
   const { mutate: deleteSong, isPending: isDeleting } = useDeleteSong();
   const [songToDelete, setSongToDelete] = useState<Song | null>(null);
   const songs: Song[] = data?.data.content ?? [];
+  const totalPages = data?.data.totalPages ?? 0;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(0);
+      setSearchQuery(search.trim());
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   function handleDelete(song: Song) {
     setSongToDelete(song);
@@ -88,6 +106,18 @@ export function SongsSection({
         transition={{ duration: 0.45, ease: "easeOut" }}
         className="glass overflow-hidden rounded-2xl"
       >
+        <div className="border-b border-border p-4">
+          <div className="relative max-w-md">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder=" Search by song or cartoon..."
+              aria-label="Search songs"
+              className="h-10 rounded-xl pl-9"
+            />
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -187,6 +217,13 @@ export function SongsSection({
           </Table>
         </div>
       </motion.div>
+
+      <PageBar
+        page={data?.data.number ?? page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        disabled={isFetching || isDeleting}
+      />
 
       <Dialog
         open={songToDelete !== null}

@@ -55,7 +55,7 @@ export function Navbar() {
             <Link
               key={link.label}
               href={link.label==="Favorites"&& !user?"/register":link.href}
-              className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+              className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
             >
               {link.label}
             </Link>
@@ -106,7 +106,7 @@ export function Navbar() {
               key={link.label}
               href={link.label==="Favorites"&& !user?"/register":link.href}
               onClick={() => setOpen(false)}
-              className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+              className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
             >
               {link.label}
             </Link>
@@ -124,7 +124,7 @@ export function Navbar() {
                 <Link
                   href="/profile"
                   onClick={() => setOpen(false)}
-                  className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                  className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
                 >
                   Profile
                 </Link>
@@ -144,7 +144,7 @@ export function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                  className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
                 >
                   Sign in
                 </Link>

@@ -2,8 +2,8 @@ import { Song, SongFilters } from "@/types";
 import { api } from "./api";
 
 export const SongService = {
-  getAll() {
-    return api.get("/songs/getAll");
+  getAll(size: number = 10, page: number = 0) {
+    return api.get(`/songs/getAll?size=${size}&page=${page}`);
   },
 
   getTrending(category?: number, size: number = 10, page: number = 0) {
