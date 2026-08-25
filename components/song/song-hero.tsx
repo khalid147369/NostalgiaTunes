@@ -10,7 +10,6 @@ import { useLike } from "@/hooks/like/useLike";
 import { useUnlike } from "@/hooks/like/useUnlike";
 import { useSave } from "@/hooks/savedSongs/useSave";
 import { useUnsave } from "@/hooks/savedSongs/useUnsave";
-import { useListen } from "@/hooks/Listen/useLike";
 
 interface SongHeroProps {
   song: Song;
@@ -33,8 +32,6 @@ export function SongHero({ song }: SongHeroProps) {
 
   const { mutate: save } = useSave();
   const { mutate: unsave } = useUnsave();
-
-  const { mutate: listen } = useListen();
 
   const liked = likedIds.has(String(song.id));
   const saved = SavedSongIds.has(String(song.id));
@@ -135,7 +132,7 @@ export function SongHero({ song }: SongHeroProps) {
                 whileTap={{ scale: 0.97 }}
                 className="flex items-center gap-2.5 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground glow-primary"
                 onClick={() => {
-                  (play(song), listen(Number(song.id)));
+                  play(song);
                 }}
               >
                 <Play className="h-4 w-4 fill-current" />

@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useLike } from "@/hooks/like/useLike";
 import { useUnlike } from "@/hooks/like/useUnlike";
-import { useListen } from "@/hooks/Listen/useLike";
 
 interface SongCardProps {
   song: Song;
@@ -26,8 +25,6 @@ export function SongCard({ song, className }: SongCardProps) {
   const { mutate: like } = useLike();
   const { mutate: unlike } = useUnlike();
 
-  const { mutate: listen } = useListen();
-
   const handleLike = () => {
     if (liked) {
       unlike(Number(song.id));
@@ -39,9 +36,6 @@ export function SongCard({ song, className }: SongCardProps) {
 
   const handlePlay = () => {
     play(song);
-    if (!isThisPlaying) {
-      listen(Number(song.id));
-    }
   };
   return (
     <motion.article
@@ -78,8 +72,7 @@ export function SongCard({ song, className }: SongCardProps) {
           }
           className={cn(
             "absolute bottom-2 right-2 flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/40 transition-all duration-300",
-            "translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100",
-            isActive && "translate-y-0 opacity-100",
+            isActive && "ring-2 ring-primary/40",
           )}
         >
           {isThisPlaying ? (

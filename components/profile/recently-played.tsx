@@ -101,7 +101,7 @@ export function RecentlyPlayed() {
                             ? `Pause ${song.title}`
                             : `Play ${song.title}`
                         }
-                        className="absolute bottom-2 right-2 flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground opacity-0 shadow-[0_0_20px_-4px] shadow-primary transition-all duration-300 group-hover:opacity-100 hover:scale-110"
+                        className="absolute bottom-2 right-2 flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_20px_-4px] shadow-primary transition-transform duration-300 hover:scale-110"
                         onClick={(e) => {
                           e.stopPropagation();
                           play(song);

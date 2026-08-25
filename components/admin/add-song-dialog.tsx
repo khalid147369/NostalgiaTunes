@@ -23,6 +23,7 @@ import {
 import { CategorySlug, Song, SongDto, SongStatus } from "@/types";
 import { useAddSong } from "@/hooks/songs/useAddSong";
 import { useUpdateSong } from "@/hooks/songs/useUpdateSong";
+import { prepareSongAudio } from "@/lib/audio-processing";
 
 const categoryOptions = [
   [CategorySlug.Spacetoon, "Spacetoon"],
@@ -75,11 +76,13 @@ export function AddSongDialog({
   const [songForm, setSongForm] = useState<SongDto>(createInitialForm);
   const [initialForm, setInitialForm] = useState<SongDto>(createInitialForm);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isProcessingAudio, setIsProcessingAudio] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
 
   const { mutateAsync: addSong, isPending } = useAddSong();
   const { mutateAsync: updateSong, isPending: isUpdating } = useUpdateSong();
   const isUpdateMode = mode === "update" && !!song;
-  const isSubmitting = isPending || isUpdating;
+  const isSubmitting = isPending || isUpdating || isProcessingAudio;
 
   useEffect(() => {
     if (open && isUpdateMode) {
@@ -134,30 +137,42 @@ export function AddSongDialog({
     if (!isFormValid || isSubmitting) return;
 
     const form = new FormData();
+    setAudioError(null);
+    setIsProcessingAudio(true);
 
-    if (isUpdateMode) {
-      if (songForm.title !== initialForm.title)
+    try {
+      const processedAudio =
+        songForm.audioFile.size > 0
+          ? await prepareSongAudio(songForm.audioFile)
+          : null;
+
+      if (isUpdateMode) {
+        if (songForm.title !== initialForm.title)
+          form.append("title", songForm.title);
+        if (songForm.cartoon !== initialForm.cartoon)
+          form.append("cartoon", songForm.cartoon);
+        if (songForm.category !== initialForm.category)
+          form.append("category", String(songForm.category));
+        if (songForm.status !== initialForm.status && songForm.status)
+          form.append("status", songForm.status.toUpperCase());
+        if (songForm.imageFile.size > 0)
+          form.append("imageFile", songForm.imageFile);
+        if (processedAudio) form.append("audioFile", processedAudio);
+        await updateSong({ id: Number(song.id), song: form });
+      } else {
         form.append("title", songForm.title);
-      if (songForm.cartoon !== initialForm.cartoon)
         form.append("cartoon", songForm.cartoon);
-      if (songForm.category !== initialForm.category)
         form.append("category", String(songForm.category));
-      if (songForm.status !== initialForm.status && songForm.status)
-        form.append("status", songForm.status.toUpperCase());
-      if (songForm.imageFile.size > 0)
         form.append("imageFile", songForm.imageFile);
-      if (songForm.audioFile.size > 0)
-        form.append("audioFile", songForm.audioFile);
-      await updateSong({ id: Number(song.id), song: form });
-    } else {
-      form.append("title", songForm.title);
-      form.append("cartoon", songForm.cartoon);
-      form.append("category", String(songForm.category));
-      form.append("imageFile", songForm.imageFile);
-      form.append("audioFile", songForm.audioFile);
-       await addSong(form);
+        form.append("audioFile", processedAudio as File);
+        await addSong(form);
+      }
+      onOpenChange(false);
+    } catch {
+      setAudioError("No se pudo preparar el audio. Intenta con otro archivo.");
+    } finally {
+      setIsProcessingAudio(false);
     }
-    onOpenChange(false);
   };
 
   return (
@@ -290,6 +305,11 @@ export function AddSongDialog({
               }
               className="h-10 rounded-xl border-glass-border bg-secondary/50 focus-visible:ring-primary/50"
             />
+            {audioError ? (
+              <p className="text-sm text-destructive" role="alert">
+                {audioError}
+              </p>
+            ) : null}
           </div>
 
           {isUpdateMode && (
@@ -336,16 +356,18 @@ export function AddSongDialog({
             </Button>
             <Button
               type="submit"
-              disabled={!isFormValid || isPending}
+              disabled={!isFormValid || isSubmitting}
               className="glow-primary rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
             >
-              {isSubmitting
-                ? isUpdateMode
-                  ? "Updating..."
-                  : "Adding..."
-                : isUpdateMode
-                  ? "Update Song"
-                  : "Add Song"}
+              {isProcessingAudio
+                ? "Processing..."
+                : isSubmitting
+                  ? isUpdateMode
+                    ? "Updating..."
+                    : "Adding..."
+                  : isUpdateMode
+                    ? "Update Song"
+                    : "Add Song"}
             </Button>
           </DialogFooter>
         </form>

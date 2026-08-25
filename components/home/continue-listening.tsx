@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import { Play } from 'lucide-react'
-import { continueListeningSong } from '@/lib/mock-data'
-import { usePlayer } from '@/contexts/player-context'
-import { Reveal } from '@/components/motion/reveal'
+import Image from "next/image";
+import { Play } from "lucide-react";
+import { continueListeningSong } from "@/lib/mock-data";
+import { usePlayer } from "@/contexts/player-context";
+import { Reveal } from "@/components/motion/reveal";
 
 export function ContinueListening() {
-  const { play } = usePlayer()
-  const song = continueListeningSong
+  const { play } = usePlayer();
+  const song = continueListeningSong;
 
   return (
     <section className="mx-auto -mt-8 max-w-7xl px-4 sm:px-6">
@@ -20,13 +20,13 @@ export function ContinueListening() {
         >
           <div className="relative size-16 shrink-0 overflow-hidden rounded-xl">
             <Image
-              src={song.cover || '/placeholder.svg'}
+              src={song.cover || "/placeholder.svg"}
               alt={song.title}
               fill
               sizes="64px"
               className="object-cover"
             />
-            <span className="absolute inset-0 flex items-center justify-center bg-background/40 opacity-0 transition-opacity group-hover:opacity-100">
+            <span className="absolute inset-0 flex items-center justify-center bg-background/40">
               <Play className="size-5 fill-current" />
             </span>
           </div>
@@ -53,5 +53,5 @@ export function ContinueListening() {
         </button>
       </Reveal>
     </section>
-  )
+  );
 }

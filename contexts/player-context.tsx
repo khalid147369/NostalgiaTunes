@@ -12,6 +12,7 @@ import {
 } from "react";
 import type { Song } from "@/types";
 import { useUser } from "@/hooks/auth/useUser";
+import { useListen } from "@/hooks/Listen/useLike";
 import { useRouter } from "next/navigation";
 
 interface PlayerContextValue {
@@ -79,6 +80,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   });
 
   const audioRef = useRef<HTMLAudioElement>(null);
+  const listenedSongIdsRef = useRef(new Set<string>());
+  const pendingListenIdsRef = useRef(new Set<string>());
+  const playedSecondsRef = useRef(0);
+  const lastAudioTimeRef = useRef(0);
+  const { mutate: recordListen } = useListen();
 
   const play = useCallback(
     (song: Song) => {
@@ -98,6 +104,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
       // Si es una canción distinta
       audioRef.current.src = song.audioUrl ?? "";
+      playedSecondsRef.current = 0;
+      lastAudioTimeRef.current = 0;
       audioRef.current.play();
 
       setCurrentSong(song);
@@ -141,10 +149,36 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audioRef.current.src = "";
     }
 
+    playedSecondsRef.current = 0;
+    lastAudioTimeRef.current = 0;
     setCurrentSong(null);
     setCurrentTime(0);
     setIsPlaying(false);
   };
+
+  useEffect(() => {
+    const songId = currentSong?.id;
+    if (!songId || !isPlaying || playedSecondsRef.current < 6) return;
+
+    const songIdString = String(songId);
+    if (
+      listenedSongIdsRef.current.has(songIdString) ||
+      pendingListenIdsRef.current.has(songIdString)
+    ) {
+      return;
+    }
+
+    pendingListenIdsRef.current.add(songIdString);
+    recordListen(Number(songId), {
+      onSuccess: () => {
+        listenedSongIdsRef.current.add(songIdString);
+        pendingListenIdsRef.current.delete(songIdString);
+      },
+      onError: () => {
+        pendingListenIdsRef.current.delete(songIdString);
+      },
+    });
+  }, [currentSong?.id, currentTime, isPlaying, recordListen]);
 
   const next = () => {
     // TODO
@@ -240,12 +274,25 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         ref={audioRef}
         onTimeUpdate={() => {
           if (audioRef.current) {
-            setCurrentTime(audioRef.current.currentTime);
+            const audioTime = audioRef.current.currentTime;
+            const elapsed = audioTime - lastAudioTimeRef.current;
+            if (elapsed > 0 && elapsed <= 1.5) {
+              playedSecondsRef.current += elapsed;
+            }
+            lastAudioTimeRef.current = audioTime;
+            setCurrentTime(audioTime);
+          }
+        }}
+        onSeeking={() => {
+          if (audioRef.current) {
+            lastAudioTimeRef.current = audioRef.current.currentTime;
           }
         }}
         onEnded={() => {
           setIsPlaying(false);
           setCurrentTime(0);
+          playedSecondsRef.current = 0;
+          lastAudioTimeRef.current = 0;
         }}
       />
     </PlayerContext.Provider>

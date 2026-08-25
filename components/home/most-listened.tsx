@@ -93,7 +93,7 @@ export function MostListened() {
                   sizes="48px"
                   className="object-cover"
                 />
-                <span className="absolute inset-0 flex items-center justify-center bg-background/50 opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="absolute inset-0 flex items-center justify-center bg-background/50">
                   {isThisPlaying ? (
                     <Pause className="size-4 fill-current" />
                   ) : (

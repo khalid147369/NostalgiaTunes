@@ -144,15 +144,17 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <LoadingSkeleton />
 
-        <AuthProvider>
-          <PlayerProvider>
-            <SearchFocusProvider>
-              <Providers>{children}</Providers>
-              {/* Global music player (inside PlayerProvider so it can use context) */}
-              <MusicPlayer />
-            </SearchFocusProvider>
-          </PlayerProvider>
-        </AuthProvider>
+        <Providers>
+          <AuthProvider>
+            <PlayerProvider>
+              <SearchFocusProvider>
+                {children}
+                {/* Global music player (inside PlayerProvider so it can use context) */}
+                <MusicPlayer />
+              </SearchFocusProvider>
+            </PlayerProvider>
+          </AuthProvider>
+        </Providers>
 
         <Analytics />
       </body>
