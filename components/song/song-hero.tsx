@@ -105,7 +105,8 @@ export function SongHero({ song }: SongHeroProps) {
           </div>
 
           <h1 className="text-4xl font-bold tracking-tight text-balance md:text-6xl">
-            {song.title}
+            <p>{song.title.split("|")[0]}</p>
+            <p>{song.title.split("|")[1]}</p>
           </h1>
 
           <p className="max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">

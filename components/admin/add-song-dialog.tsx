@@ -78,10 +78,19 @@ export function AddSongDialog({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isProcessingAudio, setIsProcessingAudio] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
+  const [currentAudioName, setCurrentAudioName] = useState<string>("");
 
   const { mutateAsync: addSong, isPending } = useAddSong();
   const { mutateAsync: updateSong, isPending: isUpdating } = useUpdateSong();
   const isUpdateMode = mode === "update" && !!song;
+
+  const hasAudioChanged =
+    songForm.audioFile.size > 0 &&
+    (!isUpdateMode ||
+      songForm.audioFile.name !== initialForm.audioFile.name ||
+      songForm.audioFile.size !== initialForm.audioFile.size ||
+      songForm.audioFile.lastModified !== initialForm.audioFile.lastModified);
+
   const isSubmitting = isPending || isUpdating || isProcessingAudio;
 
   useEffect(() => {
@@ -90,6 +99,7 @@ export function AddSongDialog({
       setSongForm(form);
       setInitialForm(form);
       setImagePreview(song.cover || null);
+      setCurrentAudioName("");
       return;
     }
 
@@ -98,14 +108,40 @@ export function AddSongDialog({
       setSongForm(form);
       setInitialForm(form);
       setImagePreview(null);
+      setCurrentAudioName("");
     }
   }, [open, isUpdateMode, song]);
 
-  const hasAudioChanged =
-    songForm.audioFile.size > 0 &&
-    (!isUpdateMode ||
-      songForm.audioFile.name !== initialForm.audioFile.name ||
-      songForm.audioFile.size !== initialForm.audioFile.size);
+  useEffect(() => {
+    if (!open || !isUpdateMode || !song?.audioUrl) return;
+
+    let active = true;
+
+    const loadCurrentAudio = async () => {
+      try {
+        const response = await fetch(song.audioUrl);
+        const blob = await response.blob();
+        const fileName = song.audioUrl.split("/").pop() || "current-audio.mp3";
+        const audioFile = new File([blob], fileName, {
+          type: blob.type || "audio/mpeg",
+        });
+
+        if (!active) return;
+
+        setSongForm((current) => ({ ...current, audioFile }));
+        setInitialForm((current) => ({ ...current, audioFile }));
+        setCurrentAudioName(fileName);
+      } catch {
+        setAudioError("No se pudo cargar el audio actual para edición.");
+      }
+    };
+
+    loadCurrentAudio();
+
+    return () => {
+      active = false;
+    };
+  }, [open, isUpdateMode, song?.audioUrl]);
 
   const hasChanges =
     songForm.title !== initialForm.title ||
@@ -143,16 +179,16 @@ export function AddSongDialog({
     if (!isFormValid || isSubmitting) return;
 
     const form = new FormData();
+    setAudioError(null);
     const shouldPrepareAudio = isUpdateMode
       ? hasAudioChanged
       : songForm.audioFile.size > 0;
-    setAudioError(null);
-
-    if (shouldPrepareAudio) {
-      setIsProcessingAudio(true);
-    }
 
     try {
+      if (shouldPrepareAudio) {
+        setIsProcessingAudio(true);
+      }
+
       const processedAudio = shouldPrepareAudio
         ? await prepareSongAudio(songForm.audioFile)
         : null;
@@ -180,7 +216,7 @@ export function AddSongDialog({
       }
       onOpenChange(false);
     } catch {
-      setAudioError("No se pudo preparar el audio. Intenta con otro archivo.");
+      setAudioError("No se pudo guardar los cambios. Intenta de nuevo.");
     } finally {
       setIsProcessingAudio(false);
     }
@@ -308,14 +344,21 @@ export function AddSongDialog({
               type="file"
               accept="audio/*"
               required={!isUpdateMode}
-              onChange={(e) =>
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? new File([], "");
                 setSongForm((current) => ({
                   ...current,
-                  audioFile: e.target.files?.[0] ?? current.audioFile,
-                }))
-              }
+                  audioFile: file,
+                }));
+                setCurrentAudioName(file.size > 0 ? file.name : "");
+              }}
               className="h-10 rounded-xl border-glass-border bg-secondary/50 focus-visible:ring-primary/50"
             />
+            {currentAudioName ? (
+              <p className="text-xs text-muted-foreground">
+                Audio actual: {currentAudioName}
+              </p>
+            ) : null}
             {audioError ? (
               <p className="text-sm text-destructive" role="alert">
                 {audioError}
