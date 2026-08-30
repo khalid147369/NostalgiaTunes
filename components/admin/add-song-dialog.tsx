@@ -101,13 +101,19 @@ export function AddSongDialog({
     }
   }, [open, isUpdateMode, song]);
 
+  const hasAudioChanged =
+    songForm.audioFile.size > 0 &&
+    (!isUpdateMode ||
+      songForm.audioFile.name !== initialForm.audioFile.name ||
+      songForm.audioFile.size !== initialForm.audioFile.size);
+
   const hasChanges =
     songForm.title !== initialForm.title ||
     songForm.cartoon !== initialForm.cartoon ||
     songForm.category !== initialForm.category ||
     songForm.status !== initialForm.status ||
     songForm.imageFile.size > 0 ||
-    songForm.audioFile.size > 0;
+    hasAudioChanged;
 
   const isFormValid = isUpdateMode
     ? hasChanges
@@ -137,14 +143,19 @@ export function AddSongDialog({
     if (!isFormValid || isSubmitting) return;
 
     const form = new FormData();
+    const shouldPrepareAudio = isUpdateMode
+      ? hasAudioChanged
+      : songForm.audioFile.size > 0;
     setAudioError(null);
-    setIsProcessingAudio(true);
+
+    if (shouldPrepareAudio) {
+      setIsProcessingAudio(true);
+    }
 
     try {
-      const processedAudio =
-        songForm.audioFile.size > 0
-          ? await prepareSongAudio(songForm.audioFile)
-          : null;
+      const processedAudio = shouldPrepareAudio
+        ? await prepareSongAudio(songForm.audioFile)
+        : null;
 
       if (isUpdateMode) {
         if (songForm.title !== initialForm.title)
