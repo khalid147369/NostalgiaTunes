@@ -10,6 +10,8 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import Link from "next/link";
+import { Bookmark, Heart } from "lucide-react";
 import type { Song } from "@/types";
 import { useUser } from "@/hooks/auth/useUser";
 import { useListen } from "@/hooks/Listen/useLike";
@@ -36,6 +38,55 @@ interface PlayerContextValue {
 }
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
+
+function AuthPromptBar({
+  action,
+  onClose,
+}: {
+  action: "like" | "save";
+  onClose: () => void;
+}) {
+  const isSave = action === "save";
+
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[100] flex justify-center px-4">
+      <div className="pointer-events-auto flex w-full max-w-lg items-center gap-3 rounded-2xl border border-white/10 bg-[#0f1220]/90 p-3 shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <div className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
+          {isSave ? (
+            <Bookmark className="h-5 w-5" />
+          ) : (
+            <Heart className="h-5 w-5" />
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-foreground">
+            {isSave ? "Save your favorites" : "Like the songs you love"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Sign in to keep your music collection and favorites synced.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-white/10 px-3 py-2 text-xs font-medium text-muted-foreground transition hover:text-foreground"
+          >
+            Later
+          </button>
+          <Link
+            href="/register"
+            className="rounded-full bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
+          >
+            Join now
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
@@ -84,6 +135,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const pendingListenIdsRef = useRef(new Set<string>());
   const playedSecondsRef = useRef(0);
   const lastAudioTimeRef = useRef(0);
+  const authPromptTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [authPrompt, setAuthPrompt] = useState<{
+    action: "like" | "save";
+    visible: boolean;
+  }>({
+    action: "like",
+    visible: false,
+  });
   const { mutate: recordListen } = useListen();
 
   const play = useCallback(
@@ -188,10 +247,22 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // TODO
   };
 
+  const showAuthPrompt = useCallback((action: "like" | "save") => {
+    setAuthPrompt({ action, visible: true });
+
+    if (authPromptTimerRef.current) {
+      clearTimeout(authPromptTimerRef.current);
+    }
+
+    authPromptTimerRef.current = setTimeout(() => {
+      setAuthPrompt((prev) => ({ ...prev, visible: false }));
+    }, 4200);
+  }, []);
+
   const toggleLike = useCallback(
     (id: string | number) => {
       if (!user && !loading) {
-        router.push("/register");
+        showAuthPrompt("like");
         return;
       }
 
@@ -215,7 +286,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const toggleSavedSong = useCallback(
     (id: string | number) => {
       if (!user && !loading) {
-        router.push("/register");
+        showAuthPrompt("save");
         return;
       }
 
@@ -235,6 +306,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     },
     [user, loading, router],
   );
+
+  useEffect(() => {
+    return () => {
+      if (authPromptTimerRef.current) {
+        clearTimeout(authPromptTimerRef.current);
+      }
+    };
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -295,6 +374,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           lastAudioTimeRef.current = 0;
         }}
       />
+
+      {authPrompt.visible && (
+        <AuthPromptBar
+          action={authPrompt.action}
+          onClose={() => setAuthPrompt((prev) => ({ ...prev, visible: false }))}
+        />
+      )}
     </PlayerContext.Provider>
   );
 }
