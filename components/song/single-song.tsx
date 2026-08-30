@@ -10,8 +10,6 @@ import { NostalgiaCta } from "./nostalgia-cta";
 import { SongCarousel } from "@/components/song/song-carousel";
 import { CommentsSection } from "@/components/song/comments-section";
 import { useFilterSong } from "@/hooks/songs/useFilterSong";
-import { useQueryClient } from "@tanstack/react-query";
-import { AxiosResponse } from "axios";
 import { Navbar } from "../layout/navbar";
 import { useTrending } from "@/hooks/songs/useTrendingSongs";
 
@@ -24,44 +22,105 @@ const SingleSong = ({ songId, initialSong }: SingleSongProps) => {
   const [song, setSong] = useState<Song | undefined>(initialSong ?? undefined);
   const [relatedSongs, setRelatedSongs] = useState<Song[]>([]);
   const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
+  const [relatedPage, setRelatedPage] = useState(0);
+  const [relatedTotalPages, setRelatedTotalPages] = useState(0);
+  const [trendingPage, setTrendingPage] = useState(0);
+  const [trendingTotalPages, setTrendingTotalPages] = useState(0);
   const { mutateAsync, isPending } = useSinglSong();
   const { mutateAsync: trending } = useTrending();
   const { mutateAsync: relatedSongsMute } = useFilterSong();
 
   const getSong = async () => {
-    const { data } = await mutateAsync(songId);
-    setSong(data);
+    try {
+      const { data } = await mutateAsync(songId);
+      setSong(data);
+      console.log("song:   ", data);
+      const categorySource = data?.category;
+      const parsedCategory = Number(categorySource);
+
+      if (!Number.isFinite(parsedCategory) || parsedCategory <= 0) {
+        setRelatedSongs([]);
+        setRelatedPage(0);
+        setRelatedTotalPages(0);
+        return;
+      }
+
+      const { data: relatedData } = await relatedSongsMute({
+        column: SongFilters.category,
+        size: 6,
+        page: 0,
+        value: String(parsedCategory),
+      });
+
+      const pageData = relatedData?.content ?? [];
+      setRelatedSongs(pageData);
+      setRelatedPage(relatedData?.number ?? 0);
+      setRelatedTotalPages(relatedData?.totalPages ?? 0);
+    } catch (error) {
+      console.error("Error loading song details:", error);
+    }
   };
 
-  const getRelatedSongs = async () => {
+  const getRelatedSongs = async (
+    nextPage = 0,
+    categoryValueOverride?: number | string | null,
+  ) => {
+    const categorySource = categoryValueOverride ?? song?.category;
+
+    if (categorySource == null) {
+      setRelatedSongs([]);
+      setRelatedPage(nextPage);
+      setRelatedTotalPages(0);
+      return null;
+    }
+
+
+    const { data: relatedData } = await relatedSongsMute({
+      column: SongFilters.category,
+      size: 6,
+      page: nextPage,
+      value: String(categorySource),
+    });
+
+    const pageData = relatedData?.content ?? [];
+    setRelatedSongs(pageData);
+    setRelatedPage(relatedData?.number ?? nextPage);
+    setRelatedTotalPages(relatedData?.totalPages ?? 0);
+
+    return relatedData;
+  };
+
+  const getTrendingSongs = async (nextPage = 0) => {
+    const { data } = await trending({ size: 6, page: nextPage });
+    setTrendingSongs(data?.content ?? []);
+    setTrendingPage(data?.number ?? nextPage);
+    setTrendingTotalPages(data?.totalPages ?? 0);
+  };
+
+  useEffect(() => {
+    const loadSong = async () => {
+      await getSong();
+      await getTrendingSongs();
+    };
+
+    loadSong();
+  }, [songId]);
+
+  useEffect(() => {
     if (song?.category == null) return;
 
-    const { data } = await relatedSongsMute({
-      column: SongFilters.category,
-      size: 10,
-      value:
-        CategorySlug[
-          song.category.toString() as keyof typeof CategorySlug
-        ].toString(),
-    });
-    setRelatedSongs(data);
+  const parsedCategory = CategorySlug[song?.category as CategorySlug];
 
-    return data;
-  };
 
-  const getTrendingSongs = async () => {
-    const { data } = await trending({});
-    setTrendingSongs(data.content);
-  };
+    console.log("parsedCategory=0000000000000",parsedCategory);
+    if (!Number.isFinite(parsedCategory) || Number(parsedCategory) <= 0) {
+      setRelatedSongs([]);
+      setRelatedPage(0);
+      setRelatedTotalPages(0);
+      return;
+    }
 
-  useEffect(() => {
-
-    if (!song) getSong();
-    getTrendingSongs();
-  }, []);
-
-  useEffect(() => {
-    getRelatedSongs();
+    getRelatedSongs(0, parsedCategory);
   }, [song]);
 
   const alsoLikeSongs = trendingSongs;
@@ -80,13 +139,19 @@ const SingleSong = ({ songId, initialSong }: SingleSongProps) => {
             <SongCarousel
               eyebrow="From the same universe"
               title="Related songs"
-              songs={relatedSongs.content || []}
+              songs={relatedSongs}
+              page={relatedPage}
+              totalPages={relatedTotalPages}
+              onPageChange={getRelatedSongs}
             />
             {alsoLikeSongs && (
               <SongCarousel
                 eyebrow="Keep the memory playing"
                 title="You may also like"
                 songs={alsoLikeSongs}
+                page={trendingPage}
+                totalPages={trendingTotalPages}
+                onPageChange={getTrendingSongs}
               />
             )}
             <NostalgiaCta />

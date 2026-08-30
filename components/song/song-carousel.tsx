@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import type { Song } from "@/types";
 import { SongCard } from "./song-card";
-import { useSinglSong } from "@/hooks/songs/useSinglSong";
+import { PageBar } from "@/components/ui/page-bar";
 
 function formatCompact(n: number) {
   if (n >= 1_000_000)
@@ -26,9 +26,21 @@ interface SongCarouselProps {
   eyebrow: string;
   title: string;
   songs: Song[];
+  page?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+  disabled?: boolean;
 }
 
-export function SongCarousel({ eyebrow, title, songs }: SongCarouselProps) {
+export function SongCarousel({
+  eyebrow,
+  title,
+  songs,
+  page = 0,
+  totalPages = 0,
+  onPageChange,
+  disabled = false,
+}: SongCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   const scrollBy = (dir: 1 | -1) => {
@@ -47,12 +59,12 @@ export function SongCarousel({ eyebrow, title, songs }: SongCarouselProps) {
               {title}
             </h2>
           </div>
-          <div className="hidden items-center gap-2 sm:flex">
+          <div dir="ltr" className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => scrollBy(-1)}
               aria-label="Scroll left"
-              className="glass flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-transform hover:scale-105"
+              className="glass flex h-8 w-8 items-center justify-center rounded-full text-foreground transition-transform hover:scale-105 sm:h-10 sm:w-10"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -60,7 +72,7 @@ export function SongCarousel({ eyebrow, title, songs }: SongCarouselProps) {
               type="button"
               onClick={() => scrollBy(1)}
               aria-label="Scroll right"
-              className="glass flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-transform hover:scale-105"
+              className="glass flex h-8 w-8 items-center justify-center rounded-full text-foreground transition-transform hover:scale-105 sm:h-10 sm:w-10"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -80,6 +92,15 @@ export function SongCarousel({ eyebrow, title, songs }: SongCarouselProps) {
               />
             ))}
         </div>
+
+        {typeof onPageChange === "function" && totalPages > 1 && (
+          <PageBar
+            page={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            disabled={disabled}
+          />
+        )}
       </div>
     </section>
   );

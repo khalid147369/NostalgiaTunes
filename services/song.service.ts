@@ -31,8 +31,11 @@ export const SongService = {
     direction: string = "desc",
     size: number = 10,
     FilterValue: string = "",
+    page: number = 0,
   ) {
-    return api.get(`/songs/getAll?${column}=${FilterValue}&size=${size}`);
+    return api.get(
+      `/songs/getAll?${column}=${FilterValue}&size=${size}&page=${page}`,
+    );
   },
   getById(id: number) {
     return api.get(`/songs/getSingle/${id}`);

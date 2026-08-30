@@ -22,6 +22,12 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
   const [category, setCategory] = useState<CategoryDTO>();
   const [mostListenedSong, setMostListenedSong] = useState<Song[]>([]);
   const [SongsByCategory, setSongsByCategory] = useState<Song[]>([]);
+  const [trendingPage, setTrendingPage] = useState(0);
+  const [trendingTotalPages, setTrendingTotalPages] = useState(0);
+  const [mostListenedPage, setMostListenedPage] = useState(0);
+  const [mostListenedTotalPages, setMostListenedTotalPages] = useState(0);
+  const [categoryPage, setCategoryPage] = useState(0);
+  const [categoryTotalPages, setCategoryTotalPages] = useState(0);
   const { mutateAsync, isPending } = useTrending();
 
   const { mutateAsync: getCategoryAsync } = useGetCategoryById();
@@ -29,12 +35,19 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
     usegetMostListenedByCategory();
   const { mutateAsync: getSongsByCategoryAsync } = usegetSongsByCategory();
 
-  useEffect(() => {
-    const getTrending = async () => {
-      const { data: response } = await mutateAsync({ category: Number(id) });
+  const getTrending = async (nextPage = 0) => {
+    const { data: response } = await mutateAsync({
+      category: Number(id),
+      size: 6,
+      page: nextPage,
+    });
 
-      setSongs(response?.content || []);
-    };
+    setSongs(response?.content || []);
+    setTrendingPage(response?.number ?? nextPage);
+    setTrendingTotalPages(response?.totalPages ?? 0);
+  };
+
+  useEffect(() => {
     getTrending();
 
     const getCategory = async () => {
@@ -46,21 +59,25 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
 
     const getMostListened = async () => {
       const { data } = await getMostListenedByCategoryAsync({
-        size: 10,
+        size: 6,
         category: Number(id),
       });
 
       setMostListenedSong(data.content || []);
+      setMostListenedPage(data.number ?? 0);
+      setMostListenedTotalPages(data.totalPages ?? 0);
     };
     getMostListened();
 
     const getSongsByCategory = async () => {
       const { data } = await getSongsByCategoryAsync({
-        size: 10,
+        size: 6,
         category: Number(id),
       });
 
       setSongsByCategory(data.content || []);
+      setCategoryPage(data.number ?? 0);
+      setCategoryTotalPages(data.totalPages ?? 0);
     };
     getSongsByCategory();
   }, []);
@@ -77,6 +94,10 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
           eyebrow="Trending right now"
           title="The songs Trending this week."
           songs={songs}
+          page={trendingPage}
+          totalPages={trendingTotalPages}
+          onPageChange={getTrending}
+          disabled={isPending}
         />
       )}
 
@@ -85,6 +106,19 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
           eyebrow="Most Listened this week"
           title="The songs lighting up the community this week."
           songs={mostListenedSong}
+          page={mostListenedPage}
+          totalPages={mostListenedTotalPages}
+          onPageChange={async (nextPage) => {
+            const { data } = await getMostListenedByCategoryAsync({
+              size: 6,
+              category: Number(id),
+              page: nextPage,
+            });
+            setMostListenedSong(data.content || []);
+            setMostListenedPage(data.number ?? nextPage);
+            setMostListenedTotalPages(data.totalPages ?? 0);
+          }}
+          disabled={false}
         />
       )}
 
@@ -93,6 +127,19 @@ const SingleCategory = ({ id }: singleCategoryInterface) => {
           eyebrow="Related songs"
           title="From the same universe"
           songs={SongsByCategory}
+          page={categoryPage}
+          totalPages={categoryTotalPages}
+          onPageChange={async (nextPage) => {
+            const { data } = await getSongsByCategoryAsync({
+              size: 6,
+              category: Number(id),
+              page: nextPage,
+            });
+            setSongsByCategory(data.content || []);
+            setCategoryPage(data.number ?? nextPage);
+            setCategoryTotalPages(data.totalPages ?? 0);
+          }}
+          disabled={false}
         />
       )}
     </div>

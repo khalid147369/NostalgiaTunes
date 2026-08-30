@@ -20,6 +20,7 @@ export function PageBar({
   return (
     <nav
       aria-label="Pagination"
+      dir="ltr"
       className="mt-6 flex items-center justify-center gap-2"
     >
       <button
@@ -31,7 +32,6 @@ export function PageBar({
       >
         <ChevronLeft className="size-4" />
       </button>
-
       <span className="min-w-20 text-center text-sm tabular-nums text-muted-foreground">
         Page {page + 1} of {totalPages}
       </span>
